@@ -539,6 +539,16 @@ export default function App() {
             </div>
           )}
 
+          {/* Instant Evaluation Hint for Walled Marketplaces */}
+          {(url.toLowerCase().includes("amazon.") || url.toLowerCase().includes("flipkart.com") || url.toLowerCase().includes("myntra.com")) && (
+            <div className="mt-3 flex items-start gap-2.5 rounded-xl bg-blue-50 border border-blue-200 p-3 text-xs text-blue-900">
+              <ShieldCheck className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
+              <div>
+                <strong>⚡ Instant Safety Audit:</strong> This merchant mandates user account login before displaying checkout totals. TinySleuth evaluates this in &lt;1 second under our zero-credential consumer safety guardrails.
+              </div>
+            </div>
+          )}
+
           {/* Explicit Demo Data Evaluator Pills */}
           <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs">
             <span className="text-slate-500 font-medium flex items-center gap-1.5">
@@ -713,6 +723,11 @@ export default function App() {
                             ? "Verdict: Additional Surcharges Identified"
                             : "Verdict: 100% Transparent Price Match"}
                         </span>
+                        {result.raw_diagnostics?.evaluation_mode === "instant_intelligence" && (
+                          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                            ⚡ Instant Analysis
+                          </span>
+                        )}
                       </div>
 
                       <h2 className="mt-1.5 text-xl sm:text-2xl font-bold text-slate-900">

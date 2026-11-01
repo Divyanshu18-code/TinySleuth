@@ -90,3 +90,19 @@ def test_audit_inconclusive_when_blocked(mock_run):
     data = resp.json()
     assert data["status"] == "inconclusive"
     assert "OTP" in data["summary_report"]
+
+
+def test_audit_instant_evaluation_for_amazon():
+    resp = client.post(
+        "/api/audit",
+        json={"url": "https://www.amazon.in/BRUTON-852-Synthetic-Leather-Sports/dp/B0DKBRMRWC?ref=sr_1_1"},
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "inconclusive"
+    assert "BRUTON 852 Synthetic Leather Sports" in data["product_title"]
+    assert data["currency"] == "₹"
+    assert data["raw_diagnostics"]["login_walled"] is True
+    assert data["raw_diagnostics"]["evaluation_mode"] == "instant_intelligence"
+    assert "Amazon" in data["findings"][0]["title"] or "Sign-In" in data["findings"][0]["title"]
+

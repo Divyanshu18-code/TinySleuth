@@ -169,6 +169,18 @@ def extract_title_from_url_slug(raw_url: str) -> Optional[str]:
             if len(title) > 3:
                 return title
 
+        # Fallback Amazon ASIN if no slug
+        if "amazon." in (parsed.hostname or "").lower():
+            asin_match = re.search(r"/(?:dp|gp/product)/([A-Z0-9]{10})", parsed.path, re.IGNORECASE)
+            if asin_match:
+                return f"Amazon Item (ASIN: {asin_match.group(1).upper()})"
+
+        # Match Flipkart pid or slug
+        if "flipkart.com" in (parsed.hostname or "").lower():
+            slug_match = re.search(r"/([^/]+)/p/itm", parsed.path, re.IGNORECASE)
+            if slug_match:
+                return unquote(slug_match.group(1)).replace("-", " ").strip()
+
         # Match general ecommerce slug e.g. /products/<slug> or /product/<slug>
         match = re.search(r"/(?:products?|items?|p)/([^/?#]+)", parsed.path, re.IGNORECASE)
         if match:
@@ -179,3 +191,33 @@ def extract_title_from_url_slug(raw_url: str) -> Optional[str]:
     except Exception:
         pass
     return None
+
+
+LOGIN_WALLED_MERCHANTS: dict[str, str] = {
+    "amazon.": "Amazon mandates account login (password and OTP) before checkout totals and delivery fees are revealed.",
+    "flipkart.": "Flipkart requires user sign-in with phone number / OTP before proceeding to checkout.",
+    "myntra.": "Myntra strictly requires mobile OTP login before viewing bag checkout details.",
+    "ajio.": "Ajio requires account login before accessing checkout and delivery charges.",
+    "nykaa.": "Nykaa requires user authentication before checkout total breakdown.",
+    "tatacliq.": "Tata CLiQ mandates personal login before order checkout.",
+    "meesho.": "Meesho requires phone number OTP verification for checkout.",
+    "aliexpress.": "AliExpress mandates user login to access final payment and checkout screens.",
+}
+
+
+def detect_login_walled_merchant(raw_url: str) -> tuple[bool, Optional[str], Optional[str]]:
+    """
+    Identifies known merchants that strictly enforce user authentication (login/OTP)
+    and do not support guest checkout.
+    Returns: (is_login_walled, merchant_name, explanation)
+    """
+    try:
+        parsed = urlparse(raw_url)
+        hostname = (parsed.hostname or "").lower()
+        for key, explanation in LOGIN_WALLED_MERCHANTS.items():
+            if key in hostname:
+                merchant_name = key.rstrip(".").capitalize()
+                return True, merchant_name, explanation
+    except Exception:
+        pass
+    return False, None, None
