@@ -15,16 +15,25 @@ def generate_findings(
 
     if extracted is None or summary.data_completeness == "inconclusive" or (extracted and extracted.blocked_reason):
         reason = extracted.blocked_reason if extracted and extracted.blocked_reason else "Unable to observe pricing data."
+        is_captcha = any(k in reason.lower() for k in ["captcha", "recaptcha", "unusual traffic", "robot", "cloudflare", "bot"])
+        
+        title = "Audit Inconclusive: Bot Challenge / CAPTCHA Encountered" if is_captcha else "Audit Inconclusive: Checkout Not Reached"
+        action = (
+            "Paste the direct retailer store URL (e.g. Amazon, Flipkart, Croma) rather than a Google Search / aggregator link, as search engines block automated web agents with CAPTCHA."
+            if is_captcha
+            else "Review the merchant checkout manually or verify guest checkout accessibility."
+        )
+
         findings.append(
             Finding(
                 id=f"find_{uuid.uuid4().hex[:8]}",
                 category="blocked_checkout",
-                title="Audit Inconclusive: Checkout Not Reached",
+                title=title,
                 severity="inconclusive",
                 explanation=f"The agent stopped safely without completing the audit: {reason}",
                 evidence=reason,
                 confidence="high",
-                suggested_action="Review the merchant checkout manually or verify guest checkout accessibility.",
+                suggested_action=action,
             )
         )
         report = (

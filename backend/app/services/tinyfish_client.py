@@ -13,18 +13,21 @@ from app.models.schemas import TinyFishRun
 AUDIT_GOAL = """
 You are an evidence-based checkout pricing auditor. Your task is to inspect this product/booking page and proceed through guest checkout to discover all added charges and preselected add-ons.
 
+IMPORTANT NAVIGATION RULES:
+- If the page is a Google Shopping, search results, or price comparison page, click on the merchant's store button ("Visit site", "View on store", or retailer link) to navigate to the actual seller's store.
+- Add the item to cart and proceed towards guest checkout as far as allowed without payment credentials or OTP.
+
 STRICT SAFETY RULES:
 1. Do NOT submit any final order or payment.
 2. Do NOT enter payment card numbers, bank details, or CVVs.
 3. Do NOT enter or request SMS OTPs or authenticator codes.
-4. Do NOT attempt to bypass CAPTCHA or security challenges.
-5. If the site mandates user login, phone OTP, or credit card info to progress, STOP immediately and record the exact blocker in blocked_reason.
-6. Never guess numbers. If an amount cannot be observed with certainty, set it to null.
+4. If blocked by reCAPTCHA, login, OTP, or credit card forms, STOP immediately and record the exact blocker in blocked_reason.
+5. Never guess numbers. If an amount cannot be observed with certainty, set it to null.
 
 AUDIT STEPS:
 1. Extract the product/booking title (product_title) and currency (e.g. INR, USD, EUR, etc.).
 2. Record the initially advertised base price (initial_price).
-3. Add the item to cart and proceed towards guest checkout as far as allowed without payment credentials or OTP.
+3. Proceed towards guest checkout as far as possible without credentials.
 4. Record whether you successfully reached the checkout total screen (reached_checkout).
 5. Inspect every added line item (taxes, shipping, convenience fee, platform fee, booking charge, insurance, protection plan, charity donation):
    - label: Exact name of the charge
@@ -34,7 +37,7 @@ AUDIT STEPS:
    - disclosed_before_checkout: true if disclosed on the initial page, false if it first appeared at checkout
    - evidence: Exact quote or text snippet seen in the webpage
 6. Record the final displayed checkout total (final_displayed_total).
-7. If stopped by auth/OTP/payment, explain in blocked_reason.
+7. If stopped by auth/OTP/payment/captcha, explain in blocked_reason.
 """.strip()
 
 OUTPUT_SCHEMA: dict[str, Any] = {
@@ -87,6 +90,7 @@ async def run_audit(url: str) -> TinyFishRun:
         "url": url,
         "goal": AUDIT_GOAL,
         "output_schema": OUTPUT_SCHEMA,
+        "browser_profile": "stealth",
     }
 
     try:

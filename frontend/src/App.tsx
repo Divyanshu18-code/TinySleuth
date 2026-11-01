@@ -465,7 +465,7 @@ export default function App() {
                 type="url"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                placeholder="Paste e-commerce or booking checkout URL (e.g. https://...)"
+                placeholder="Paste direct store URL (e.g. https://www.amazon.in/dp/...)"
                 disabled={loading}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-3 pl-10 pr-16 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 transition disabled:opacity-50"
               />
@@ -498,6 +498,16 @@ export default function App() {
               )}
             </button>
           </form>
+
+          {/* Search aggregator hint banner */}
+          {(url.toLowerCase().includes("google.com/search") || url.toLowerCase().includes("google.com/shopping") || url.toLowerCase().includes("bing.com")) && (
+            <div className="mt-3 flex items-start gap-2.5 rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-900">
+              <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <strong>Notice:</strong> You pasted a search engine / aggregator link. Search engines block automated browsers with reCAPTCHA. Please click through to the actual merchant store (e.g. <em>Amazon</em>, <em>Croma</em>, <em>Flipkart</em>) and paste that direct store URL for a successful checkout audit.
+              </div>
+            </div>
+          )}
 
           {/* Explicit Demo Data Evaluator Pills */}
           <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs">
