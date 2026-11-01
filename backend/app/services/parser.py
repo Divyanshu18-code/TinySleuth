@@ -22,7 +22,7 @@ def clean_number(val: Any) -> Optional[float]:
     return None
 
 
-def parse_pricing(result: Any) -> Optional[ExtractedPricing]:
+def parse_pricing(result: Any, original_url: Optional[str] = None) -> Optional[ExtractedPricing]:
     """Turn the agent's raw output into validated ExtractedPricing data, or None if unusable."""
     if result is None:
         return None
@@ -78,16 +78,34 @@ def parse_pricing(result: Any) -> Optional[ExtractedPricing]:
                     )
                 )
 
+    product_title = result.get("product_title")
+    if not product_title and original_url:
+        from app.core.security import extract_title_from_url_slug
+        product_title = extract_title_from_url_slug(original_url)
+
+    currency = result.get("currency")
+    if not currency and original_url:
+        from urllib.parse import urlparse
+        host = (urlparse(original_url).hostname or "").lower()
+        if host.endswith(".in") or "amazon.in" in host or "flipkart.com" in host:
+            currency = "₹"
+        elif host.endswith(".uk") or "co.uk" in host:
+            currency = "£"
+        elif any(host.endswith(tld) for tld in (".de", ".fr", ".es", ".it", ".eu")):
+            currency = "€"
+        else:
+            currency = "$"
+
     try:
         return ExtractedPricing(
-            product_title=result.get("product_title"),
-            currency=result.get("currency"),
+            product_title=product_title,
+            currency=currency,
             initial_price=clean_number(result.get("initial_price")),
             final_displayed_total=clean_number(result.get("final_displayed_total")),
             charges=sanitized_charges,
             reached_checkout=bool(result.get("reached_checkout", False)),
             blocked_reason=result.get("blocked_reason"),
-            source_url=result.get("source_url"),
+            source_url=result.get("source_url") or original_url,
         )
     except ValidationError:
         return None

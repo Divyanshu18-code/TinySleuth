@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException
 
-from app.core.security import validate_target_url
+from app.core.security import clean_tracking_url, validate_target_url
 from app.models.schemas import AuditRequest, AuditResponse
 from app.services.detection_service import generate_findings
 from app.services.parser import parse_pricing
@@ -33,16 +33,17 @@ async def audit(req: AuditRequest):
     audit_id = f"audit_{uuid.uuid4().hex[:12]}"
     created_at = datetime.now(timezone.utc).isoformat()
 
-    # 2. Invoke TinyFish Autonomous Web Agent
+    # 2. Invoke TinyFish Autonomous Web Agent (Clean tracking bloat for faster performance)
+    target_url = clean_tracking_url(validated_url)
     try:
-        run = await run_audit(validated_url)
+        run = await run_audit(target_url)
     except TinyFishError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
 
     completed_at = datetime.now(timezone.utc).isoformat()
 
     # 3. Parse and Validate Extracted Pricing
-    pricing = parse_pricing(run.result)
+    pricing = parse_pricing(run.result, original_url=validated_url)
 
     # 4. Handle Execution Interruptions / Inconclusive States
     if run.status != "COMPLETED":

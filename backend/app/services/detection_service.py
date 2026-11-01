@@ -15,19 +15,44 @@ def generate_findings(
 
     if extracted is None or summary.data_completeness == "inconclusive" or (extracted and extracted.blocked_reason):
         reason = extracted.blocked_reason if extracted and extracted.blocked_reason else "Unable to observe pricing data."
+        is_login = any(k in reason.lower() for k in ["login", "sign-in", "signin", "account", "password", "otp", "credential"])
         is_captcha = any(k in reason.lower() for k in ["captcha", "recaptcha", "unusual traffic", "robot", "cloudflare", "bot"])
-        
-        title = "Audit Inconclusive: Bot Challenge / CAPTCHA Encountered" if is_captcha else "Audit Inconclusive: Checkout Not Reached"
-        action = (
-            "Paste the direct retailer store URL (e.g. Amazon, Flipkart, Croma) rather than a Google Search / aggregator link, as search engines block automated web agents with CAPTCHA."
-            if is_captcha
-            else "Review the merchant checkout manually or verify guest checkout accessibility."
-        )
+
+        category = "blocked_checkout"
+        if is_login:
+            title = "Audit Halted Safely: Merchant Requires User Sign-In"
+            action = (
+                "Amazon, Flipkart, and similar marketplaces enforce mandatory account login before showing checkout fees and delivery. "
+                "TinySleuth halted safely to protect user credentials. Test stores with Guest Checkout (e.g. Shopify, D2C brands, travel bookings) or inspect Amazon checkout manually."
+            )
+            report = (
+                f"Safety Guardrail Triggered: The inspection halted safely because the merchant mandates personal account login ({reason}). "
+                f"TinySleuth strictly adheres to consumer safety standards and will never request or submit your personal account password or OTP."
+            )
+        elif is_captcha:
+            category = "blocked_checkout"
+            title = "Audit Inconclusive: Bot Challenge / CAPTCHA Encountered"
+            action = (
+                "Paste the direct retailer store URL (e.g. Amazon, Flipkart, Croma) rather than a Google Search / aggregator link, as search engines block automated web agents with CAPTCHA."
+            )
+            report = (
+                f"Audit Inconclusive: The inspection could not be completed because an automated bot challenge was encountered ({reason}). "
+                f"Paste the direct merchant product URL to avoid aggregator bot blockers."
+            )
+        else:
+            category = "blocked_checkout"
+            title = "Audit Inconclusive: Checkout Not Reached"
+            action = "Review the merchant checkout manually or verify guest checkout accessibility."
+            report = (
+                f"Audit Inconclusive: The inspection could not be completed because the site restricted "
+                f"access ({reason}). TinySleuth adheres to strict consumer safety protocols and halts "
+                f"immediately when login credentials, OTP verifications, or payment details are mandated."
+            )
 
         findings.append(
             Finding(
                 id=f"find_{uuid.uuid4().hex[:8]}",
-                category="blocked_checkout",
+                category=category,
                 title=title,
                 severity="inconclusive",
                 explanation=f"The agent stopped safely without completing the audit: {reason}",
@@ -35,11 +60,6 @@ def generate_findings(
                 confidence="high",
                 suggested_action=action,
             )
-        )
-        report = (
-            f"Audit Inconclusive: The inspection could not be completed because the site restricted "
-            f"access ({reason}). TinySleuth adheres to strict consumer safety protocols and halts "
-            f"immediately when login credentials, OTP verifications, or payment details are mandated."
         )
         return findings, report
 

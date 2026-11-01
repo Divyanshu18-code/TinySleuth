@@ -1,5 +1,5 @@
 import pytest
-from app.core.security import validate_target_url
+from app.core.security import clean_tracking_url, extract_title_from_url_slug, validate_target_url
 
 
 def test_valid_urls():
@@ -52,3 +52,20 @@ def test_reject_empty_or_too_long():
 
     with pytest.raises(ValueError, match="maximum length"):
         validate_target_url("https://example.com/" + "a" * 2050)
+
+
+def test_clean_tracking_url():
+    # Amazon tracking parameters stripped to canonical /dp/<ASIN>
+    raw_amz = "https://www.amazon.in/Product-Title/dp/B0HMHW8CFH/ref=sr_1_2?dib=xyz&qid=123"
+    assert clean_tracking_url(raw_amz) == "https://www.amazon.in/dp/B0HMHW8CFH"
+
+    # General UTM tracking params stripped
+    raw_general = "https://store.example.com/item?utm_source=fb&utm_medium=cpc&item_id=456"
+    assert clean_tracking_url(raw_general) == "https://store.example.com/item?item_id=456"
+
+
+def test_extract_title_from_url_slug():
+    url = "https://www.amazon.in/VASTRACHHAYA-Electric-Wireless-waterproof-Multicoloured/dp/B0HMHW8CFH"
+    title = extract_title_from_url_slug(url)
+    assert title == "VASTRACHHAYA Electric Wireless waterproof Multicoloured"
+

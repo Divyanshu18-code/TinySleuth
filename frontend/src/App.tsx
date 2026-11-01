@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   ShieldCheck,
@@ -290,6 +290,7 @@ export default function App() {
   const [isDemoData, setIsDemoData] = useState(false);
   const [showRawJson, setShowRawJson] = useState(false);
   const [copied, setCopied] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
 
   // Live progress simulation tracker
   useEffect(() => {
@@ -308,6 +309,15 @@ export default function App() {
       clearInterval(stageTimer);
     };
   }, [loading]);
+
+  function handleCancel() {
+    if (abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
+    }
+    setLoading(false);
+    setError("Audit stopped by user.");
+  }
 
   async function handleAudit(targetUrl: string, demo?: AuditResponse) {
     setError(null);
@@ -329,14 +339,21 @@ export default function App() {
       return;
     }
 
+    const controller = new AbortController();
+    abortRef.current = controller;
     setLoading(true);
     try {
-      const data = await startAudit(targetUrl);
+      const data = await startAudit(targetUrl, controller.signal);
       setResult(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Audit request failed.");
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === "AbortError") {
+        setError("Audit was stopped.");
+      } else {
+        setError(err instanceof Error ? err.message : "Audit request failed.");
+      }
     } finally {
       setLoading(false);
+      abortRef.current = null;
     }
   }
 
@@ -350,6 +367,19 @@ export default function App() {
   const pricing = result?.extracted_pricing;
   const summary = result?.pricing_summary;
   const currency = result?.currency || pricing?.currency || "₹";
+
+  const isLoginWall =
+    result?.status === "inconclusive" &&
+    Boolean(
+      result.findings?.some(
+        (f) =>
+          f.title.toLowerCase().includes("sign-in") ||
+          f.title.toLowerCase().includes("login") ||
+          (f.evidence && (f.evidence.toLowerCase().includes("sign-in") || f.evidence.toLowerCase().includes("login")))
+      ) ||
+        result.summary_report?.toLowerCase().includes("login") ||
+        result.summary_report?.toLowerCase().includes("sign-in")
+    );
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans antialiased">
@@ -570,9 +600,18 @@ export default function App() {
                     <p className="text-xs text-slate-500">Autonomous web agent inspecting checkout workflow</p>
                   </div>
                 </div>
-                <span className="rounded-full bg-blue-50 border border-blue-200 px-3 py-1 text-xs font-semibold text-blue-700">
-                  {elapsedSeconds}s elapsed
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full bg-blue-50 border border-blue-200 px-3 py-1 text-xs font-semibold text-blue-700">
+                    {elapsedSeconds}s elapsed
+                  </span>
+                  <button
+                    onClick={handleCancel}
+                    type="button"
+                    className="rounded-full border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 px-2.5 py-1 text-xs font-semibold transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
 
               {/* Progress Steps List */}
@@ -678,7 +717,9 @@ export default function App() {
 
                       <h2 className="mt-1.5 text-xl sm:text-2xl font-bold text-slate-900">
                         {result.status === "inconclusive"
-                          ? "Checkout Analysis Inconclusive"
+                          ? isLoginWall
+                            ? "Audit Halted Safely: Merchant Requires Sign-In"
+                            : "Checkout Analysis Inconclusive"
                           : (summary?.price_difference ?? 0) > 0
                           ? `Total increased by ${currency}${summary?.price_difference?.toLocaleString()} (+${summary?.percentage_increase}%)`
                           : "Initial price matches final checkout total"}
@@ -702,6 +743,32 @@ export default function App() {
                   </button>
                 </div>
               </div>
+
+              {/* Login Wall Explanatory Callout Banner */}
+              {isLoginWall && (
+                <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 sm:p-6 shadow-xs">
+                  <div className="flex items-start gap-3.5">
+                    <div className="p-2.5 rounded-xl bg-amber-100 text-amber-800 shrink-0 mt-0.5">
+                      <Lock className="h-5 w-5" />
+                    </div>
+                    <div className="space-y-2 text-xs sm:text-sm">
+                      <h4 className="font-bold text-amber-900 text-base">Why Did TinySleuth Stop Here? (Safety Guardrail)</h4>
+                      <p className="text-amber-800 leading-relaxed">
+                        <strong>Amazon</strong>, <strong>Flipkart</strong>, and similar marketplaces enforce mandatory account login (password or phone OTP) before displaying the checkout screen with taxes, delivery fees, and order totals.
+                      </p>
+                      <p className="text-amber-800 leading-relaxed">
+                        🛡️ <strong>Zero Credential Policy:</strong> TinySleuth adheres to strict consumer safety standards. The AI agent intentionally halts immediately before requesting or entering your password, OTP, or credit card.
+                      </p>
+                      <div className="pt-2 border-t border-amber-200/80">
+                        <span className="font-semibold text-amber-900">💡 Best websites to audit with TinySleuth:</span>
+                        <p className="text-amber-800 mt-1">
+                          TinySleuth delivers the best full checkout audits on stores and services that support <strong>Guest Checkout</strong> — including <strong>Shopify & D2C stores</strong> (apparel, beauty, electronics), <strong>Flight & Hotel bookings</strong>, and <strong>Food delivery</strong> platforms where hidden fees and drip charges typically appear during checkout!
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Price Summary Cards (5 Key Metrics) */}
               {summary && (
@@ -729,9 +796,13 @@ export default function App() {
                     <div className="text-xl sm:text-2xl font-bold text-slate-900">
                       {summary.final_displayed_total !== null && summary.final_displayed_total !== undefined
                         ? `${currency}${summary.final_displayed_total.toLocaleString()}`
+                        : isLoginWall
+                        ? <span className="text-amber-700 text-lg sm:text-xl">Sign-in Wall</span>
                         : "N/A"}
                     </div>
-                    <span className="text-[10px] text-slate-500">At checkout screen</span>
+                    <span className="text-[10px] text-slate-500">
+                      {isLoginWall ? "Requires account login" : "At checkout screen"}
+                    </span>
                   </div>
 
                   {/* Mandatory Additional Charges */}
@@ -741,9 +812,17 @@ export default function App() {
                       <DollarSign className="h-3.5 w-3.5 text-slate-400" />
                     </div>
                     <div className="text-xl sm:text-2xl font-bold text-slate-900">
-                      {currency}{summary.mandatory_charges_total.toLocaleString()}
+                      {summary.final_displayed_total === null && result.status === "inconclusive" ? (
+                        <span className="text-slate-500 text-lg sm:text-xl">Unverified</span>
+                      ) : (
+                        `${currency}${summary.mandatory_charges_total.toLocaleString()}`
+                      )}
                     </div>
-                    <span className="text-[10px] text-slate-500">Taxes, delivery, platform</span>
+                    <span className="text-[10px] text-slate-500">
+                      {summary.final_displayed_total === null && result.status === "inconclusive"
+                        ? "Locked behind sign-in"
+                        : "Taxes, delivery, platform"}
+                    </span>
                   </div>
 
                   {/* Optional Selected Add-ons */}
@@ -753,9 +832,17 @@ export default function App() {
                       <SlidersHorizontal className="h-3.5 w-3.5 text-slate-400" />
                     </div>
                     <div className="text-xl sm:text-2xl font-bold text-slate-900">
-                      {currency}{summary.optional_selected_charges_total.toLocaleString()}
+                      {summary.final_displayed_total === null && result.status === "inconclusive" ? (
+                        <span className="text-slate-500 text-lg sm:text-xl">Unverified</span>
+                      ) : (
+                        `${currency}${summary.optional_selected_charges_total.toLocaleString()}`
+                      )}
                     </div>
-                    <span className="text-[10px] text-slate-500">Pre-ticked add-ons</span>
+                    <span className="text-[10px] text-slate-500">
+                      {summary.final_displayed_total === null && result.status === "inconclusive"
+                        ? "Locked behind sign-in"
+                        : "Pre-ticked add-ons"}
+                    </span>
                   </div>
 
                   {/* Net Price Difference */}
@@ -766,15 +853,27 @@ export default function App() {
                     </div>
                     <div
                       className={`text-xl sm:text-2xl font-bold ${
-                        (summary.price_difference ?? 0) > 0 ? "text-rose-600" : "text-emerald-600"
+                        summary.final_displayed_total === null && result.status === "inconclusive"
+                          ? "text-slate-500"
+                          : (summary.price_difference ?? 0) > 0
+                          ? "text-rose-600"
+                          : "text-emerald-600"
                       }`}
                     >
-                      {(summary.price_difference ?? 0) > 0
-                        ? `+${currency}${summary.price_difference?.toLocaleString()}`
-                        : `${currency}0`}
+                      {summary.final_displayed_total === null && result.status === "inconclusive" ? (
+                        "—"
+                      ) : (summary.price_difference ?? 0) > 0 ? (
+                        `+${currency}${summary.price_difference?.toLocaleString()}`
+                      ) : (
+                        `${currency}0`
+                      )}
                     </div>
                     <span className="text-[10px] text-slate-500">
-                      {summary.percentage_increase ? `+${summary.percentage_increase}% markup` : "No price increase"}
+                      {summary.final_displayed_total === null && result.status === "inconclusive"
+                        ? "Checkout not reached"
+                        : summary.percentage_increase
+                        ? `+${summary.percentage_increase}% markup`
+                        : "No price increase"}
                     </span>
                   </div>
                 </div>

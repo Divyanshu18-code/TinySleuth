@@ -63,11 +63,12 @@ export interface AuditResponse {
   raw_diagnostics?: Record<string, unknown> | null;
 }
 
-export async function startAudit(url: string): Promise<AuditResponse> {
+export async function startAudit(url: string, signal?: AbortSignal): Promise<AuditResponse> {
   const res = await fetch("/api/audit", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ url }),
+    signal,
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));

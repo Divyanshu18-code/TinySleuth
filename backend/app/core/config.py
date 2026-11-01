@@ -12,7 +12,7 @@ class Settings(BaseSettings):
 
     tinyfish_api_key: str = ""
     tinyfish_base_url: str = "https://agent.tinyfish.ai"
-    tinyfish_timeout_seconds: int = 300
+    tinyfish_timeout_seconds: int = 90
     frontend_origin: str = "http://localhost:5173"
 
 

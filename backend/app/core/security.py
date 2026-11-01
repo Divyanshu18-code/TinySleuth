@@ -1,6 +1,8 @@
 import ipaddress
+import re
 import socket
-from urllib.parse import urlparse
+from typing import Optional
+from urllib.parse import parse_qsl, unquote, urlencode, urlparse, urlunparse
 
 
 BLOCKED_HOSTS = {
@@ -110,3 +112,70 @@ def validate_target_url(raw_url: str) -> str:
         raise ValueError(f"Could not resolve hostname '{hostname_lower}': {exc}") from exc
 
     return cleaned_url
+
+
+def clean_tracking_url(raw_url: str) -> str:
+    """
+    Clean tracking tokens and canonicalize URLs for major merchants (e.g. Amazon, Flipkart).
+    Strips affiliate bloat, tracking IDs, and session tokens to speed up page loads.
+    """
+    cleaned = raw_url.strip()
+    parsed = urlparse(cleaned)
+    hostname = (parsed.hostname or "").lower()
+
+    # Amazon URL canonicalization: extract ASIN
+    if "amazon." in hostname:
+        asin_match = re.search(r"/(?:dp|gp/product)/([A-Z0-9]{10})", parsed.path, re.IGNORECASE)
+        if asin_match:
+            asin = asin_match.group(1).upper()
+            return f"{parsed.scheme}://{parsed.netloc}/dp/{asin}"
+
+    # Flipkart URL canonicalization: keep path and pid
+    if "flipkart.com" in hostname:
+        pid_match = re.search(r"[?&]pid=([A-Z0-9]+)", parsed.query, re.IGNORECASE)
+        if pid_match:
+            return f"{parsed.scheme}://{parsed.netloc}{parsed.path}?pid={pid_match.group(1)}"
+
+    # General tracking parameters removal
+    if parsed.query:
+        query_params = parse_qsl(parsed.query, keep_blank_values=True)
+        filtered = [
+            (k, v)
+            for k, v in query_params
+            if not (
+                k.lower().startswith("utm_")
+                or k.lower() in ("fbclid", "gclid", "_ga", "_gl", "ref", "ref_", "dib", "dib_tag", "qid", "sr")
+            )
+        ]
+        if len(filtered) != len(query_params):
+            new_query = urlencode(filtered)
+            return urlunparse((parsed.scheme, parsed.netloc, parsed.path, parsed.params, new_query, parsed.fragment))
+
+    return cleaned
+
+
+def extract_title_from_url_slug(raw_url: str) -> Optional[str]:
+    """
+    Extract human-readable product title from URL slug if available.
+    Useful when the merchant blocks guest checkout before page metadata is extracted.
+    """
+    try:
+        parsed = urlparse(raw_url)
+        # Match Amazon /<slug>/dp/<ASIN>
+        match = re.search(r"/([^/]+)/(?:dp|gp/product)/[A-Z0-9]{10}", parsed.path, re.IGNORECASE)
+        if match:
+            slug = match.group(1)
+            title = unquote(slug).replace("-", " ").replace("_", " ").strip()
+            if len(title) > 3:
+                return title
+
+        # Match general ecommerce slug e.g. /products/<slug> or /product/<slug>
+        match = re.search(r"/(?:products?|items?|p)/([^/?#]+)", parsed.path, re.IGNORECASE)
+        if match:
+            slug = match.group(1)
+            title = unquote(slug).replace("-", " ").replace("_", " ").strip()
+            if len(title) > 3:
+                return title
+    except Exception:
+        pass
+    return None
