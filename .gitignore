@@ -59,6 +59,7 @@ out/
 
 # System & Editor
 .vscode/
+pyrightconfig.json
 .idea/
 *.swp
 *.swo
