@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { motion, useReducedMotion } from "motion/react";
-import { ShoppingBag, Info } from "lucide-react";
+import { Info } from "lucide-react";
 
 interface ThreeDPriceStackProps {
   isAuditing?: boolean;
@@ -259,21 +259,21 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
     glassGroup.add(reticleMesh);
 
     // Polished Chrome Junction Ring
-    const collarGeom = new THREE.CylinderGeometry(0.13, 0.13, 0.15, 24);
+    const collarGeom = new THREE.CylinderGeometry(0.13, 0.13, 0.14, 24);
     const collarMat = new THREE.MeshStandardMaterial({
       color: 0xd1d5db,
       metalness: 0.90,
       roughness: 0.12,
     });
     const collarMesh = new THREE.Mesh(collarGeom, collarMat);
-    collarMesh.position.set(-0.86, -0.86, 0);
+    collarMesh.position.set(-0.80, -0.80, 0);
     collarMesh.rotation.z = Math.PI / 4;
     glassGroup.add(collarMesh);
 
-    // Slender Ergonomic Royal Blue Handle
-    const handleGeom = new THREE.CylinderGeometry(0.12, 0.10, 1.45, 24);
+    // Slender Ergonomic Royal Blue Handle (Proportioned so it never clips or gets covered)
+    const handleGeom = new THREE.CylinderGeometry(0.12, 0.10, 1.25, 24);
     const handleMesh = new THREE.Mesh(handleGeom, glassBlueMat);
-    handleMesh.position.set(-1.34, -1.34, 0);
+    handleMesh.position.set(-1.20, -1.20, 0);
     handleMesh.rotation.z = Math.PI / 4;
     handleMesh.castShadow = true;
     glassGroup.add(handleMesh);
@@ -281,11 +281,12 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
     // Polished Rounded Tip Cap
     const capGeom = new THREE.SphereGeometry(0.11, 20, 20);
     const capMesh = new THREE.Mesh(capGeom, glassBlueMat);
-    capMesh.position.set(-1.85, -1.85, 0);
+    capMesh.position.set(-1.64, -1.64, 0);
     glassGroup.add(capMesh);
 
-    // Positioning: Hovering cleanly over the right side of the product box
-    glassGroup.position.set(1.25, 0.72, 1.85);
+    // Positioning: Hovering cleanly over the upper-right of the product box
+    // Leaves generous whitespace on the bottom-left so the search icon handle is 100% visible
+    glassGroup.position.set(1.50, 1.05, 1.80);
     glassGroup.rotation.order = "YXZ";
     glassGroup.rotation.y = 0.65;
     glassGroup.rotation.x = -0.32;
@@ -313,10 +314,10 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
       if (auditStateRef.current) {
         // Active scanning mode during audit execution
         const scanCycle = (Math.sin(elapsedTime * 3.2) + 1) / 2; // 0 to 1
-        const targetY = 0.25 + scanCycle * 0.95;
+        const targetY = 0.50 + scanCycle * 0.85;
         glassGroup.position.y += (targetY - glassGroup.position.y) * 0.15;
-        glassGroup.position.x = 1.20 + Math.cos(elapsedTime * 2.2) * 0.14;
-        glassGroup.position.z = 1.90 + Math.sin(elapsedTime * 1.8) * 0.10;
+        glassGroup.position.x = 1.45 + Math.cos(elapsedTime * 2.2) * 0.12;
+        glassGroup.position.z = 1.85 + Math.sin(elapsedTime * 1.8) * 0.08;
         glassGroup.rotation.z = Math.sin(elapsedTime * 2.8) * 0.05;
 
         // Subtle layer pulse reaction under scan
@@ -329,15 +330,16 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
           }
         });
       } else {
-        // Smooth idle inspection hover
-        const hoverOffsetY = Math.sin(elapsedTime * 1.5) * 0.045;
+        // Smooth idle inspection hover framing the upper-right of the product box
+        // Leaves the entire bottom-left search handle completely unobstructed and in plain view
+        const hoverOffsetY = Math.sin(elapsedTime * 1.5) * 0.04;
         const hoverOffsetX = Math.cos(elapsedTime * 1.1) * 0.03;
-        const targetY = 0.72 + hoverOffsetY;
-        const targetX = 1.25 + hoverOffsetX;
+        const targetY = 1.05 + hoverOffsetY;
+        const targetX = 1.50 + hoverOffsetX;
 
         glassGroup.position.y += (targetY - glassGroup.position.y) * 0.08;
         glassGroup.position.x += (targetX - glassGroup.position.x) * 0.08;
-        glassGroup.position.z += (1.85 - glassGroup.position.z) * 0.08;
+        glassGroup.position.z += (1.80 - glassGroup.position.z) * 0.08;
         glassGroup.rotation.z = Math.sin(elapsedTime * 1.2) * 0.025;
 
         // Gentle highlight on active layer if selected
@@ -442,35 +444,25 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
             <div className="text-[10px] font-medium text-slate-500 mt-0.5">Mandatory checkout fee</div>
           </motion.div>
 
-          {/* Label 1: Product Price (Bottom-Left) — PRIMARY HERO FOCUS */}
+          {/* Label 1: Product Price (Bottom-Left) — Sleek, Non-Overlapping Primary Hero Focus */}
           <motion.div
-            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 15, scale: 0.92 }}
+            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 12, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ delay: 0.15, duration: 0.45 }}
+            transition={{ delay: 0.15, duration: 0.4 }}
             onClick={() => onLayerSelect && onLayerSelect(0)}
-            className={`pointer-events-auto absolute bottom-4 left-3 sm:bottom-6 sm:left-5 rounded-2xl border-2 border-blue-600 bg-white p-3.5 sm:p-4 shadow-xl shadow-blue-500/15 ring-4 ring-blue-500/10 transition transform cursor-pointer min-w-[210px] max-w-[240px] ${
-              activeLayer === 0 ? "ring-blue-600/25 bg-blue-50/30" : "hover:shadow-2xl hover:-translate-y-0.5"
+            className={`pointer-events-auto absolute bottom-3 left-3 sm:bottom-4 sm:left-4 rounded-xl border-2 border-blue-600 bg-white/95 backdrop-blur-md px-3 py-2 sm:px-3.5 sm:py-2.5 shadow-lg shadow-blue-500/10 ring-4 ring-blue-500/10 transition transform cursor-pointer w-auto max-w-[160px] sm:max-w-[170px] ${
+              activeLayer === 0 ? "ring-blue-600/25 bg-blue-50/40" : "hover:shadow-xl hover:-translate-y-0.5"
             }`}
           >
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-blue-600 shrink-0">
-                <ShoppingBag className="h-4 w-4" />
-              </div>
-              <div>
-                <div className="text-[11px] font-bold text-blue-600 uppercase tracking-wider">Product Price</div>
-                <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-none mt-0.5">
-                  ₹999
-                </div>
-              </div>
+            <div className="text-[10px] sm:text-[11px] font-bold text-blue-600 uppercase tracking-wider">
+              Product Price
             </div>
-            <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px]">
-              <span className="font-semibold text-emerald-600 flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Base Sticker Rate
-              </span>
-              <span className="font-bold text-blue-700 uppercase tracking-wider text-[9px] bg-blue-50 px-1.5 py-0.5 rounded">
-                Focus
-              </span>
+            <div className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none my-1">
+              ₹999
+            </div>
+            <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] font-medium text-emerald-600">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+              <span>Base Sticker Rate</span>
             </div>
           </motion.div>
 
