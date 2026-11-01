@@ -5,24 +5,21 @@ import {
   Search,
   AlertTriangle,
   CheckCircle2,
-  ArrowRight,
   Lock,
   RefreshCw,
   Copy,
   Check,
-  ChevronDown,
-  ChevronUp,
   Receipt,
   ShoppingBag,
   Info,
   DollarSign,
   TrendingUp,
   SlidersHorizontal,
-  FileText,
-  AlertCircle,
   ExternalLink,
+  ChevronDown,
 } from "lucide-react";
 import { startAudit, type AuditResponse } from "./api";
+import ThreeDPriceStack from "./components/ThreeDPriceStack";
 
 // Verified demo datasets for hackathon presentation and offline evaluation
 const DEMO_SCENARIOS: Array<{
@@ -49,51 +46,44 @@ const DEMO_SCENARIOS: Array<{
         initial_price: 3499.0,
         final_displayed_total: 4448.0,
         reached_checkout: true,
-        blocked_reason: null,
         charges: [
           {
-            label: "Base Airfare",
-            amount: 3499.0,
-            classification: "fare",
+            label: "User Development Fee (UDF)",
+            amount: 450.0,
+            currency: "₹",
+            classification: "tax",
             mandatory: true,
-            preselected: false,
-            disclosed_before_checkout: true,
-            evidence: "Published base fare on flight search page: ₹3,499",
-          },
-          {
-            label: "Platform Convenience Fee",
-            amount: 399.0,
-            classification: "convenience_fee",
-            mandatory: true,
-            preselected: false,
+            preselected: true,
             disclosed_before_checkout: false,
-            evidence: "Mandatory convenience fee added at payment gateway screen: ₹399",
+            evidence: "Government & Airport Regulatory Levy: ₹450.00",
           },
           {
-            label: "Travel Protection Insurance",
-            amount: 250.0,
-            classification: "insurance",
+            label: "Convenience Fee",
+            amount: 299.0,
+            currency: "₹",
+            classification: "fee",
+            mandatory: true,
+            preselected: true,
+            disclosed_before_checkout: false,
+            evidence: "Internet handling & payment gateway surcharge: ₹299.00",
+          },
+          {
+            label: "Travel Insurance Protection",
+            amount: 200.0,
+            currency: "₹",
+            classification: "addon",
             mandatory: false,
             preselected: true,
             disclosed_before_checkout: false,
-            evidence: "Pre-ticked checkmark: 'Secure your trip for ₹250 per passenger'",
-          },
-          {
-            label: "Passenger Aviation Security Fee",
-            amount: 300.0,
-            classification: "tax",
-            mandatory: true,
-            preselected: false,
-            disclosed_before_checkout: false,
-            evidence: "Regulatory security surcharge injected at review screen: ₹300",
+            evidence: "Comprehensive trip delay & medical coverage (Pre-ticked): ₹200.00",
           },
         ],
       },
       pricing_summary: {
         initial_price: 3499.0,
         final_displayed_total: 4448.0,
-        mandatory_charges_total: 699.0,
-        optional_selected_charges_total: 250.0,
+        mandatory_charges_total: 749.0,
+        optional_selected_charges_total: 200.0,
         unknown_charges_total: 0.0,
         expected_total: 4448.0,
         price_difference: 949.0,
@@ -103,90 +93,69 @@ const DEMO_SCENARIOS: Array<{
       },
       findings: [
         {
-          id: "find_pre_insurance",
+          id: "find_preselected_insurance",
           category: "preselected_addon",
-          title: "Pre-selected Optional Add-on: Travel Protection Insurance",
+          title: "Pre-selected Optional Add-on: Travel Insurance Protection",
           severity: "potential_concern",
-          explanation: "The optional item 'Travel Protection Insurance' (₹250.0) was pre-selected by default without explicit consumer opt-in.",
-          evidence: "Pre-ticked checkmark: 'Secure your trip for ₹250 per passenger'",
+          explanation: "The optional line item 'Travel Insurance Protection' (₹200) was pre-selected by default without explicit consumer opt-in.",
+          evidence: "Comprehensive trip delay & medical coverage (Pre-ticked): ₹200.00",
           confidence: "high",
-          suggested_action: "Deselect this optional add-on before final transaction if you have existing travel insurance.",
+          suggested_action: "Ensure you deselect this checkmark before payment if you do not require optional trip insurance.",
           status: "active",
         },
         {
-          id: "find_undisc_convenience",
+          id: "find_undisclosed_convenience",
           category: "hidden_fee",
-          title: "Surprise Surcharge: Platform Convenience Fee",
+          title: "Surprise Surcharge: Convenience Fee",
           severity: "needs_review",
-          explanation: "The mandatory charge 'Platform Convenience Fee' (₹399.0) was not disclosed on the flight search page and only appeared at payment.",
-          evidence: "Mandatory convenience fee added at payment gateway screen: ₹399",
+          explanation: "The charge 'Convenience Fee' (₹299) was not disclosed on the initial flight search results page and first appeared during checkout.",
+          evidence: "Internet handling & payment gateway surcharge: ₹299.00",
           confidence: "high",
-          suggested_action: "Factor this additional fee into your total purchasing comparison.",
-          status: "active",
-        },
-        {
-          id: "find_high_markup",
-          category: "price_increase",
-          title: "High Checkout Surcharge (+27.1%)",
-          severity: "needs_review",
-          explanation: "The final checkout price increased by 27.1% (₹949.0) over the initially advertised airfare.",
-          evidence: "Base: ₹3499.0 -> Checkout: ₹4448.0",
-          confidence: "high",
-          suggested_action: "Compare total invoice price against airlines offering all-inclusive fares.",
+          suggested_action: "Factor in this mandatory booking fee when comparing fares across airlines.",
           status: "active",
         },
       ],
-      summary_report: "TinySleuth audited the checkout flow for 'Domestic Non-Stop Flight: DEL -> BOM'. Initial advertised price: ₹3499.0. Final displayed total: ₹4448.0. A net increase of ₹949.0 (+27.1%) was recorded across checkout steps. ⚠️ Flagged 1 pre-selected optional add-on(s) added without explicit user consent. Identified ₹699.0 in mandatory additional charges. A total of 3 item(s) require consumer review before completing checkout. Notice: TinySleuth performs non-destructive guest checkout inspection and never submits orders or card details. This audit does not guarantee the absence of all merchant fees that may require authentication or location entry.",
-      message: null,
+      summary_report: "Audit Complete: Final checkout price increased by ₹949 (+27.1%) over initially advertised rate of ₹3,499. Detected 1 pre-selected optional add-on (₹200) and 2 undisclosed checkout fees.",
     },
   },
   {
-    name: "Audio Store (Transparent Pricing)",
+    name: "Wireless Headphones (Transparent)",
     badge: "🎧 Transparent",
-    url: "https://demo-audiostore.com/headphones/anc-pro",
+    url: "https://demo-audio-store.in/headphones/anc-pro",
     data: {
-      audit_id: "audit_demo_audio_219",
-      url: "https://demo-audiostore.com/headphones/anc-pro",
+      audit_id: "audit_demo_headphones_412",
+      url: "https://demo-audio-store.in/headphones/anc-pro",
       status: "completed",
       created_at: new Date().toISOString(),
       completed_at: new Date().toISOString(),
-      product_title: "ANC Pro Wireless Noise-Cancelling Headphones",
+      product_title: "SonicWave Wireless Noise-Cancelling Headphones",
       currency: "₹",
       extracted_pricing: {
-        product_title: "ANC Pro Wireless Noise-Cancelling Headphones",
+        product_title: "SonicWave Wireless Noise-Cancelling Headphones",
         currency: "₹",
-        initial_price: 2999.0,
-        final_displayed_total: 2999.0,
+        initial_price: 2499.0,
+        final_displayed_total: 2499.0,
         reached_checkout: true,
-        blocked_reason: null,
         charges: [
           {
-            label: "Product Unit Price",
-            amount: 2999.0,
-            classification: "item",
-            mandatory: true,
-            preselected: false,
-            disclosed_before_checkout: true,
-            evidence: "Product detail page price: ₹2,999 (inclusive of all taxes)",
-          },
-          {
-            label: "Standard Express Shipping",
+            label: "Standard Free Delivery",
             amount: 0.0,
+            currency: "₹",
             classification: "delivery",
             mandatory: true,
-            preselected: false,
+            preselected: true,
             disclosed_before_checkout: true,
-            evidence: "Free shipping applied automatically to cart",
+            evidence: "Free Express Shipping on all prepaid orders: ₹0.00",
           },
         ],
       },
       pricing_summary: {
-        initial_price: 2999.0,
-        final_displayed_total: 2999.0,
+        initial_price: 2499.0,
+        final_displayed_total: 2499.0,
         mandatory_charges_total: 0.0,
         optional_selected_charges_total: 0.0,
         unknown_charges_total: 0.0,
-        expected_total: 2999.0,
+        expected_total: 2499.0,
         price_difference: 0.0,
         percentage_increase: 0.0,
         component_discrepancy: null,
@@ -194,57 +163,56 @@ const DEMO_SCENARIOS: Array<{
       },
       findings: [
         {
-          id: "find_trans_clean",
+          id: "find_clean_pricing",
           category: "transparent_pricing",
-          title: "Transparent Pricing Verified",
+          title: "100% Transparent Price Match",
           severity: "informational",
-          explanation: "The advertised price matched the final checkout total with no hidden fees or preselected items detected.",
-          evidence: "Advertised ₹2999.0 == Checkout ₹2999.0",
+          explanation: "The final checkout total exactly matches the advertised base price. No hidden fees or pre-selected add-ons were detected.",
+          evidence: "Base rate: ₹2,499 | Checkout total: ₹2,499",
           confidence: "high",
-          suggested_action: "No concerns identified for the inspected checkout flow.",
+          suggested_action: "No action required. Pricing is honest and transparent.",
           status: "active",
         },
       ],
-      summary_report: "TinySleuth audited the checkout flow for 'ANC Pro Wireless Noise-Cancelling Headphones'. Initial advertised price: ₹2999.0. Final displayed total: ₹2999.0. The final checkout total matched the advertised price exactly. No hidden fees or misleading design patterns were detected in the observed flow. Notice: TinySleuth performs non-destructive guest checkout inspection and never submits orders or card details. This audit does not guarantee the absence of all merchant fees that may require authentication or location entry.",
-      message: null,
+      summary_report: "Audit Complete: Honest & transparent pricing. The advertised price of ₹2,499 matches the final checkout price with zero surprise surcharges.",
     },
   },
   {
-    name: "Luxury Resort (OTP Inconclusive)",
-    badge: "🏨 OTP Blocked",
-    url: "https://demo-resort.com/deluxe-villa",
+    name: "Luxury Resort (OTP Blocked)",
+    badge: "🎁 OTP Blocked",
+    url: "https://demo-resorts.com/villas/heritage-suite",
     data: {
-      audit_id: "audit_demo_resort_550",
-      url: "https://demo-resort.com/deluxe-villa",
+      audit_id: "audit_demo_otp_771",
+      url: "https://demo-resorts.com/villas/heritage-suite",
       status: "inconclusive",
       created_at: new Date().toISOString(),
       completed_at: new Date().toISOString(),
-      product_title: "Seaside Deluxe Villa — 3 Nights",
+      product_title: "Heritage Deluxe Pool Villa (2 Nights)",
       currency: "₹",
       extracted_pricing: {
-        product_title: "Seaside Deluxe Villa — 3 Nights",
+        product_title: "Heritage Deluxe Pool Villa (2 Nights)",
         currency: "₹",
-        initial_price: 18500.0,
+        initial_price: 8500.0,
         final_displayed_total: null,
         reached_checkout: false,
         blocked_reason: "Site strictly enforced mandatory SMS OTP phone verification before viewing reservation fee breakdown.",
         charges: [],
       },
       pricing_summary: {
-        initial_price: 18500.0,
+        initial_price: 8500.0,
         final_displayed_total: null,
         mandatory_charges_total: 0.0,
         optional_selected_charges_total: 0.0,
         unknown_charges_total: 0.0,
-        expected_total: null,
+        expected_total: 8500.0,
         price_difference: null,
         percentage_increase: null,
         component_discrepancy: null,
-        data_completeness: "inconclusive",
+        data_completeness: "partial",
       },
       findings: [
         {
-          id: "find_blocked_otp",
+          id: "find_otp_blocked",
           category: "blocked_checkout",
           title: "Audit Inconclusive: Checkout Not Reached",
           severity: "inconclusive",
@@ -255,19 +223,16 @@ const DEMO_SCENARIOS: Array<{
           status: "active",
         },
       ],
-      summary_report: "Audit Inconclusive: The inspection could not be completed because the site restricted access (Site strictly enforced mandatory SMS OTP phone verification before viewing reservation fee breakdown.). TinySleuth adheres to strict consumer safety protocols and halts immediately when login credentials, OTP verifications, or payment details are mandated.",
-      message: "Agent halted safely: Site enforced mandatory SMS OTP verification.",
+      summary_report: "Audit Inconclusive: The inspection could not be completed because the site restricted access (Site strictly enforced mandatory SMS OTP phone verification). TinySleuth adheres to strict consumer safety protocols and halts immediately when login credentials, OTP verifications, or payment details are mandated.",
     },
   },
 ];
 
 const AUDIT_STAGES = [
-  "Validating URL & applying SSRF guardrails...",
-  "Initializing headless TinyFish web agent session...",
-  "Loading product page & extracting advertised base price...",
-  "Navigating cart and progressing through guest checkout...",
-  "Dissecting invoice line items, taxes & add-on checkboxes...",
-  "Running mathematical pricing comparisons & discrepancy engine...",
+  "Connecting to merchant store in stealth browser profile...",
+  "Inspecting DOM & identifying advertised base price...",
+  "Testing checkout flow & verifying guest access...",
+  "Inspecting order summary and fee breakdown...",
   "Generating final evidence-based audit report...",
 ];
 
@@ -290,7 +255,10 @@ export default function App() {
   const [isDemoData, setIsDemoData] = useState(false);
   const [showRawJson, setShowRawJson] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [activeStoryIndex, setActiveStoryIndex] = useState(0);
   const abortRef = useRef<AbortController | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   // Live progress simulation tracker
   useEffect(() => {
@@ -302,7 +270,7 @@ export default function App() {
       intervalTimer = setInterval(() => setElapsedSeconds((s) => s + 1), 1000);
       stageTimer = setInterval(() => {
         setStageIndex((prev) => (prev < AUDIT_STAGES.length - 1 ? prev + 1 : prev));
-      }, 4500);
+      }, 3500);
     }
     return () => {
       clearInterval(intervalTimer);
@@ -330,7 +298,8 @@ export default function App() {
       setTimeout(() => {
         setResult(demo);
         setLoading(false);
-      }, 1500);
+        resultsRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 1200);
       return;
     }
 
@@ -345,6 +314,10 @@ export default function App() {
     try {
       const data = await startAudit(targetUrl, controller.signal);
       setResult(data);
+      // Smooth scroll to results after completion
+      setTimeout(() => {
+        resultsRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 200);
     } catch (err: unknown) {
       if (err instanceof Error && err.name === "AbortError") {
         setError("Audit was stopped.");
@@ -381,228 +354,275 @@ export default function App() {
         result.summary_report?.toLowerCase().includes("sign-in")
     );
 
+  const isAmazonOrFlipkart =
+    url.toLowerCase().includes("amazon.") ||
+    url.toLowerCase().includes("flipkart.com") ||
+    url.toLowerCase().includes("myntra.com");
+
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans antialiased">
-      {/* Top Professional SaaS Navigation */}
-      <header className="border-b border-slate-200 bg-white sticky top-0 z-50 shadow-xs">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6 py-3.5">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white font-bold shadow-xs">
-              <Search className="h-5 w-5" />
+    <div className="min-h-screen bg-gradient-to-b from-[#FBFBFE] via-[#F8FAFC] to-[#F1F5F9] text-slate-900 font-sans antialiased selection:bg-indigo-500 selection:text-white">
+      {/* 1. Header Navigation (Identical to reference screenshot) */}
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 py-3.5">
+          {/* Brand Logo */}
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 text-white shadow-xs">
+              <Search className="h-4 w-4" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-lg font-bold tracking-tight text-slate-900">TinySleuth</span>
-                <span className="rounded-md bg-blue-50 border border-blue-200 px-2 py-0.5 text-[11px] font-semibold text-blue-700">
-                  MVP v1.0
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-500 font-medium">Checkout Truth & Price Auditor</p>
+            <div className="flex items-center">
+              <span className="text-lg font-bold text-slate-900 tracking-tight">Tiny</span>
+              <span className="text-lg font-bold text-indigo-600 tracking-tight">Sleuth</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 text-xs font-medium text-slate-600">
-            <div className="hidden sm:flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-700">
-              <span className="flex h-2 w-2 rounded-full bg-emerald-500"></span>
-              <span>TinyFish Agent Ready</span>
-            </div>
-            <a
-              href="#how-it-works"
-              className="hover:text-blue-600 transition"
-            >
-              How It Works
+          {/* Nav Links + Start Audit Action Button */}
+          <div className="flex items-center gap-6 text-sm font-medium text-slate-600">
+            <a href="#how-it-works" className="hidden md:inline hover:text-indigo-600 transition">
+              How it works
             </a>
-            <a
-              href="https://github.com/Divyanshu18-code/TinySleuth"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 rounded-md border border-slate-200 px-2.5 py-1 text-slate-700 hover:bg-slate-50 transition"
-            >
-              <span>GitHub</span>
-              <ExternalLink className="h-3 w-3 text-slate-400" />
+            <a href="#features" className="hidden md:inline hover:text-indigo-600 transition">
+              Features
             </a>
+            <a href="#fair-by-design" className="hidden md:inline hover:text-indigo-600 transition">
+              Fair by design
+            </a>
+            <button
+              onClick={() => {
+                inputRef.current?.focus();
+                inputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+              }}
+              className="rounded-full bg-[#5B50E6] hover:bg-[#4E43D8] text-white px-5 py-2 text-xs font-semibold shadow-xs hover:shadow-indigo-500/20 active:scale-95 transition"
+            >
+              Start audit
+            </button>
           </div>
         </div>
       </header>
 
-      {/* Main Workspace Area */}
-      <main className="mx-auto max-w-5xl px-4 sm:px-6 py-10">
-        {/* Hero Section */}
-        <section className="text-center max-w-3xl mx-auto mb-10">
-          <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-1 text-xs font-semibold text-slate-600 shadow-xs mb-4">
-            <ShieldCheck className="h-4 w-4 text-blue-600" />
-            <span>AI-Powered Autonomous Web Agent</span>
+      {/* 2. Main 3D Hero Workspace */}
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-8 sm:pt-14 pb-20">
+        {/* Top 2-Column Hero: Left Copy/Input + Right 3D Layer Stack */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          {/* Left Column: Copy, Input Form, Demo Buttons */}
+          <div className="lg:col-span-7 space-y-6">
+            {/* MVP Badge */}
+            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50/70 px-3.5 py-1 text-xs font-semibold text-indigo-700">
+              <span className="h-1.5 w-1.5 rounded-full bg-indigo-600 animate-pulse" />
+              <span>AI checkout price auditor · MVP preview</span>
+            </div>
+
+            {/* Headline */}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.08]">
+              Know the real price{" "}
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
+                before you pay.
+              </span>
+            </h1>
+
+            {/* Subheading */}
+            <p className="text-base sm:text-lg text-slate-600 leading-relaxed font-normal max-w-2xl">
+              Uncover the truth behind every checkout. Paste a link and TinySleuth inspects it for extra fees and
+              pre-selected add-ons, with evidence for every finding.
+            </p>
+
+            {/* Floating Input Card (Exact Reference Design) */}
+            <div className="rounded-2xl border border-slate-200/90 bg-white/95 p-2 shadow-xl shadow-indigo-500/5 backdrop-blur-md">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleAudit(url);
+                }}
+                className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2"
+              >
+                <div className="relative flex-1">
+                  <input
+                    ref={inputRef}
+                    type="url"
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    placeholder="https://example.com/product"
+                    disabled={loading}
+                    className="w-full rounded-xl bg-transparent py-3 pl-4 pr-10 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none transition disabled:opacity-50"
+                  />
+                  {url && !loading && (
+                    <button
+                      type="button"
+                      onClick={() => setUrl("")}
+                      className="absolute inset-y-0 right-0 pr-3 text-xs text-slate-400 hover:text-slate-600"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading || !url}
+                  className="rounded-xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-md shadow-indigo-500/20 hover:from-indigo-600 hover:to-purple-700 transition active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                      <span>Auditing...</span>
+                    </>
+                  ) : (
+                    <span>Start Audit</span>
+                  )}
+                </button>
+              </form>
+            </div>
+
+            {/* Hint text below input matching screenshot */}
+            <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium pl-1">
+              <span>↓ Scroll and watch the price come apart</span>
+            </div>
+
+            {/* Instant Mode Notice for Amazon / Flipkart */}
+            {isAmazonOrFlipkart && (
+              <div className="flex items-start gap-2.5 rounded-xl bg-blue-50/80 border border-blue-200 p-3 text-xs text-blue-900">
+                <ShieldCheck className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
+                <div>
+                  <strong>⚡ Instant Safety Audit:</strong> This merchant mandates user account login before displaying checkout totals. TinySleuth evaluates this in &lt;1 second under our zero-credential consumer safety guardrails.
+                </div>
+              </div>
+            )}
+
+            {/* Search engine aggregator notice */}
+            {(url.toLowerCase().includes("google.com/search") || url.toLowerCase().includes("google.com/shopping") || url.toLowerCase().includes("bing.com")) && (
+              <div className="flex items-start gap-2.5 rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-900">
+                <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <strong>Notice:</strong> You pasted a search aggregator link. Search engines block automated browsers with reCAPTCHA. Please paste the direct store URL (e.g. <em>Amazon</em>, <em>Croma</em>, <em>Flipkart</em>) for a successful checkout audit.
+                </div>
+              </div>
+            )}
+
+            {/* Error Message Alert */}
+            {error && (
+              <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-xs text-red-800">
+                <AlertTriangle className="h-4 w-4 text-red-600 shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <span className="font-semibold text-red-900">Audit Request Error:</span> {error}
+                </div>
+              </div>
+            )}
+
+            {/* Demo Evaluator Buttons */}
+            <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center gap-2.5 text-xs">
+              <span className="text-slate-500 font-medium flex items-center gap-1.5">
+                <Info className="h-3.5 w-3.5 text-slate-400" />
+                <span>Or inspect verified demo evaluations:</span>
+              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                {DEMO_SCENARIOS.map((scenario) => (
+                  <button
+                    key={scenario.name}
+                    type="button"
+                    disabled={loading}
+                    onClick={() => {
+                      setUrl(scenario.url);
+                      handleAudit(scenario.url, scenario.data);
+                    }}
+                    className="rounded-lg border border-slate-200 bg-white/80 px-2.5 py-1 text-slate-700 font-medium hover:border-indigo-300 hover:bg-indigo-50/50 hover:text-indigo-700 transition disabled:opacity-50"
+                  >
+                    <span className="text-[10px] uppercase font-bold text-slate-400 mr-1.5">[DEMO DATA]</span>
+                    <span>{scenario.badge}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 leading-tight">
-            Know the Real Price <br className="hidden sm:inline" />
-            <span className="text-blue-600">Before You Pay</span>
-          </h1>
-
-          <p className="mt-4 text-base sm:text-lg text-slate-600 leading-relaxed font-normal">
-            TinySleuth inspects checkout flows, compares displayed prices, and helps you understand additional charges
-            before you complete a purchase.
-          </p>
-
-          {/* Three Feature Pillars */}
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3.5 text-left">
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600 mb-2.5">
-                <Search className="h-4 w-4" />
-              </div>
-              <h2 className="text-sm font-bold text-slate-900">1. Inspect</h2>
-              <p className="mt-1 text-xs text-slate-500 leading-normal">
-                TinyFish web agent navigates the real merchant page as a guest without touching payment details.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-50 text-violet-600 mb-2.5">
-                <SlidersHorizontal className="h-4 w-4" />
-              </div>
-              <h2 className="text-sm font-bold text-slate-900">2. Compare</h2>
-              <p className="mt-1 text-xs text-slate-500 leading-normal">
-                Calculates mathematical discrepancy between initially listed price and final displayed checkout total.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 mb-2.5">
-                <ShieldCheck className="h-4 w-4" />
-              </div>
-              <h2 className="text-sm font-bold text-slate-900">3. Understand</h2>
-              <p className="mt-1 text-xs text-slate-500 leading-normal">
-                Identifies mandatory fees, surprise surcharges, and pre-selected add-ons with direct evidence quotes.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* URL Submission Card */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm mb-6">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleAudit(url);
-            }}
-            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
-          >
-            <div className="relative flex-1">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
-                <Search className="h-4 w-4" />
-              </div>
-              <input
-                type="url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="Paste direct store URL (e.g. https://www.amazon.in/dp/...)"
-                disabled={loading}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-3 pl-10 pr-16 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 transition disabled:opacity-50"
+          {/* Right Column: 3D Layer Stack & Magnifying Glass */}
+          <div className="lg:col-span-5 relative">
+            <div className="rounded-3xl border border-slate-100 bg-gradient-to-tr from-white via-indigo-50/30 to-purple-50/40 p-2 sm:p-4 shadow-xl shadow-indigo-500/5">
+              <ThreeDPriceStack
+                isAuditing={loading}
+                activeLayer={activeStoryIndex}
+                onLayerSelect={(idx) => setActiveStoryIndex(idx)}
               />
-              {url && !loading && (
-                <button
-                  type="button"
-                  onClick={() => setUrl("")}
-                  className="absolute inset-y-0 right-0 pr-3.5 text-xs text-slate-400 hover:text-slate-600"
-                >
-                  Clear
-                </button>
-              )}
+              <div className="text-center pb-2">
+                <span className="text-[11px] text-slate-400">
+                  {loading ? "🔍 Magnifying glass scanning checkout layers..." : "Interactive 3D Checkout Stack · Click pills to inspect layers"}
+                </span>
+              </div>
             </div>
+          </div>
+        </div>
 
-            <button
-              type="submit"
-              disabled={loading || !url}
-              className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-xs hover:bg-blue-700 transition active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed"
+        {/* 3. Progressive Scroll Story Cards (Matches Screenshot 1) */}
+        <section className="mt-20 pt-10 border-t border-slate-200/60">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">The Pricing Anatomy</span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">Watch how the price comes apart.</h2>
+            <p className="text-sm text-slate-500 mt-2">
+              From the advertised sticker price to the hidden checkmarks, see every fee layer before paying.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Step 01 */}
+            <div
+              onClick={() => setActiveStoryIndex(0)}
+              className={`rounded-2xl border p-6 bg-white transition cursor-pointer ${
+                activeStoryIndex === 0
+                  ? "border-blue-500 shadow-md ring-2 ring-blue-500/20"
+                  : "border-slate-200 hover:border-slate-300"
+              }`}
             >
-              {loading ? (
-                <>
-                  <RefreshCw className="h-4 w-4 animate-spin" />
-                  <span>Auditing...</span>
-                </>
-              ) : (
-                <>
-                  <span>Start Audit</span>
-                  <ArrowRight className="h-4 w-4" />
-                </>
-              )}
-            </button>
-          </form>
-
-          {/* Search aggregator hint banner */}
-          {(url.toLowerCase().includes("google.com/search") || url.toLowerCase().includes("google.com/shopping") || url.toLowerCase().includes("bing.com")) && (
-            <div className="mt-3 flex items-start gap-2.5 rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-900">
-              <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-              <div>
-                <strong>Notice:</strong> You pasted a search engine / aggregator link. Search engines block automated browsers with reCAPTCHA. Please click through to the actual merchant store (e.g. <em>Amazon</em>, <em>Croma</em>, <em>Flipkart</em>) and paste that direct store URL for a successful checkout audit.
-              </div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-blue-600">01 · THE STICKER PRICE</span>
+              <div className="text-3xl sm:text-4xl font-black text-slate-900 mt-2 mb-3">₹999</div>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                This is what the product page shows you. It is the number you decide on.
+              </p>
             </div>
-          )}
 
-          {/* Instant Evaluation Hint for Walled Marketplaces */}
-          {(url.toLowerCase().includes("amazon.") || url.toLowerCase().includes("flipkart.com") || url.toLowerCase().includes("myntra.com")) && (
-            <div className="mt-3 flex items-start gap-2.5 rounded-xl bg-blue-50 border border-blue-200 p-3 text-xs text-blue-900">
-              <ShieldCheck className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
-              <div>
-                <strong>⚡ Instant Safety Audit:</strong> This merchant mandates user account login before displaying checkout totals. TinySleuth evaluates this in &lt;1 second under our zero-credential consumer safety guardrails.
-              </div>
+            {/* Step 02 */}
+            <div
+              onClick={() => setActiveStoryIndex(1)}
+              className={`rounded-2xl border p-6 bg-white transition cursor-pointer ${
+                activeStoryIndex === 1 || activeStoryIndex === 2
+                  ? "border-indigo-500 shadow-md ring-2 ring-indigo-500/20"
+                  : "border-slate-200 hover:border-slate-300"
+              }`}
+            >
+              <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-600">02 · THE MANDATORY LAYERS</span>
+              <div className="text-3xl sm:text-4xl font-black text-slate-900 mt-2 mb-3">₹1,077</div>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Handling ₹29 and a service fee of ₹49 appear on the way to checkout. They are not optional, so TinySleuth counts them in the real total.
+              </p>
             </div>
-          )}
 
-          {/* Explicit Demo Data Evaluator Pills */}
-          <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs">
-            <span className="text-slate-500 font-medium flex items-center gap-1.5">
-              <Info className="h-3.5 w-3.5 text-slate-400" />
-              <span>Or inspect verified demo evaluations:</span>
-            </span>
-            <div className="flex flex-wrap items-center gap-2">
-              {DEMO_SCENARIOS.map((scenario) => (
-                <button
-                  key={scenario.name}
-                  type="button"
-                  disabled={loading}
-                  onClick={() => {
-                    setUrl(scenario.url);
-                    handleAudit(scenario.url, scenario.data);
-                  }}
-                  className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-slate-700 font-medium hover:border-blue-300 hover:bg-blue-50/50 hover:text-blue-700 transition disabled:opacity-50"
-                >
-                  <span className="text-[10px] uppercase font-bold text-slate-400 mr-1.5">[DEMO DATA]</span>
-                  <span>{scenario.badge}</span>
-                </button>
-              ))}
+            {/* Step 03 */}
+            <div
+              onClick={() => setActiveStoryIndex(3)}
+              className={`rounded-2xl border p-6 bg-white transition cursor-pointer ${
+                activeStoryIndex === 3
+                  ? "border-amber-500 shadow-md ring-2 ring-amber-500/20"
+                  : "border-slate-200 hover:border-slate-300"
+              }`}
+            >
+              <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600">03 · THE HIDDEN CHECKMARKS</span>
+              <div className="text-3xl sm:text-4xl font-black text-slate-900 mt-2 mb-3">₹1,176</div>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                A ₹99 protection plan pre-ticked by default. If you don't deselect it, this becomes your checkout reality.
+              </p>
             </div>
           </div>
-
-          {/* Privacy & Safety Guarantee */}
-          <div className="mt-3 text-[11px] text-slate-500 flex items-center gap-1.5">
-            <Lock className="h-3 w-3 text-emerald-600" />
-            <span>Strict consumer safety guardrails: TinySleuth never submits card details, never places orders, and halts before OTP or login steps.</span>
-          </div>
-
-          {/* Error Message Alert */}
-          {error && (
-            <div className="mt-4 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-xs text-red-800">
-              <AlertCircle className="h-4 w-4 text-red-600 shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <span className="font-semibold text-red-900">Audit Request Error:</span> {error}
-              </div>
-            </div>
-          )}
         </section>
 
-        {/* AUDIT PROGRESS TRACKER (Active Loading State) */}
+        {/* 4. Active Loading Tracker */}
         <AnimatePresence>
           {loading && (
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="rounded-2xl border border-blue-200 bg-white p-6 shadow-sm mb-6"
+              className="mt-12 rounded-2xl border border-indigo-200 bg-white p-6 shadow-md"
             >
               <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
                     <RefreshCw className="h-4 w-4 animate-spin" />
                   </div>
                   <div>
@@ -611,7 +631,7 @@ export default function App() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="rounded-full bg-blue-50 border border-blue-200 px-3 py-1 text-xs font-semibold text-blue-700">
+                  <span className="rounded-full bg-indigo-50 border border-indigo-200 px-3 py-1 text-xs font-semibold text-indigo-700">
                     {elapsedSeconds}s elapsed
                   </span>
                   <button
@@ -634,7 +654,7 @@ export default function App() {
                       key={idx}
                       className={`flex items-center gap-3 p-2.5 rounded-lg text-xs font-medium transition ${
                         isCurrent
-                          ? "bg-blue-50/70 border border-blue-200 text-blue-800"
+                          ? "bg-indigo-50/70 border border-indigo-200 text-indigo-800"
                           : isDone
                           ? "text-slate-600"
                           : "text-slate-400 opacity-60"
@@ -643,7 +663,7 @@ export default function App() {
                       {isDone ? (
                         <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
                       ) : isCurrent ? (
-                        <span className="flex h-2 w-2 rounded-full bg-blue-600 animate-ping mx-1 shrink-0" />
+                        <span className="flex h-2 w-2 rounded-full bg-indigo-600 animate-ping mx-1 shrink-0" />
                       ) : (
                         <span className="h-2 w-2 rounded-full bg-slate-300 mx-1 shrink-0" />
                       )}
@@ -656,355 +676,351 @@ export default function App() {
           )}
         </AnimatePresence>
 
-        {/* AUDIT RESULTS REPORT */}
-        <AnimatePresence>
-          {result && !loading && (
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="space-y-6"
-            >
-              {/* Demo Mode Notice Banner (if triggered via demo) */}
-              {isDemoData && (
-                <div className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs text-amber-800">
-                  <div className="flex items-center gap-2">
-                    <Info className="h-4 w-4 text-amber-600 shrink-0" />
-                    <span><strong>DEMO EVALUATION DATA:</strong> This report represents verified pre-recorded pricing evidence for evaluation purposes.</span>
-                  </div>
-                  <span className="font-semibold uppercase tracking-wider text-[10px] bg-amber-100 px-2 py-0.5 rounded">Demo Data</span>
-                </div>
-              )}
-
-              {/* Top Verdict Status Banner */}
-              <div
-                className={`rounded-2xl border p-6 shadow-sm ${
-                  result.status === "inconclusive"
-                    ? "bg-amber-50/40 border-amber-200"
-                    : (summary?.price_difference ?? 0) > 0 || (result.findings.some(f => f.category === "preselected_addon"))
-                    ? "bg-rose-50/40 border-rose-200"
-                    : "bg-emerald-50/40 border-emerald-200"
-                }`}
+        {/* 5. AUDIT RESULTS REPORT */}
+        <div ref={resultsRef}>
+          <AnimatePresence>
+            {result && !loading && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35 }}
+                className="mt-14 space-y-6"
               >
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div className="flex items-start gap-4">
-                    <div
-                      className={`p-3 rounded-xl shrink-0 ${
-                        result.status === "inconclusive"
-                          ? "bg-amber-100 text-amber-700"
-                          : (summary?.price_difference ?? 0) > 0 || (result.findings.some(f => f.category === "preselected_addon"))
-                          ? "bg-rose-100 text-rose-700"
-                          : "bg-emerald-100 text-emerald-700"
-                      }`}
-                    >
-                      {result.status === "inconclusive" ? (
-                        <AlertTriangle className="h-6 w-6" />
-                      ) : (summary?.price_difference ?? 0) > 0 ? (
-                        <TrendingUp className="h-6 w-6" />
-                      ) : (
-                        <CheckCircle2 className="h-6 w-6" />
-                      )}
+                {/* Demo Mode Notice Banner (if triggered via demo) */}
+                {isDemoData && (
+                  <div className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs text-amber-800">
+                    <div className="flex items-center gap-2">
+                      <Info className="h-4 w-4 text-amber-600 shrink-0" />
+                      <span>
+                        <strong>DEMO EVALUATION DATA:</strong> This report represents verified pre-recorded pricing evidence for evaluation purposes.
+                      </span>
                     </div>
+                    <span className="font-semibold uppercase tracking-wider text-[10px] bg-amber-100 px-2 py-0.5 rounded">
+                      Demo Data
+                    </span>
+                  </div>
+                )}
 
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
-                            result.status === "inconclusive"
-                              ? "bg-amber-100 text-amber-800"
-                              : (summary?.price_difference ?? 0) > 0
-                              ? "bg-rose-100 text-rose-800"
-                              : "bg-emerald-100 text-emerald-800"
-                          }`}
-                        >
-                          {result.status === "inconclusive"
-                            ? "Audit Status: Inconclusive"
-                            : (summary?.price_difference ?? 0) > 0
-                            ? "Verdict: Additional Surcharges Identified"
-                            : "Verdict: 100% Transparent Price Match"}
-                        </span>
-                        {result.raw_diagnostics?.evaluation_mode === "instant_intelligence" && (
-                          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
-                            ⚡ Instant Analysis
-                          </span>
+                {/* Top Verdict Status Banner */}
+                <div
+                  className={`rounded-2xl border p-6 shadow-sm ${
+                    result.status === "inconclusive"
+                      ? "bg-amber-50/40 border-amber-200"
+                      : (summary?.price_difference ?? 0) > 0 || result.findings.some((f) => f.category === "preselected_addon")
+                      ? "bg-rose-50/40 border-rose-200"
+                      : "bg-emerald-50/40 border-emerald-200"
+                  }`}
+                >
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                      <div
+                        className={`p-3 rounded-xl shrink-0 ${
+                          result.status === "inconclusive"
+                            ? "bg-amber-100 text-amber-700"
+                            : (summary?.price_difference ?? 0) > 0 || result.findings.some((f) => f.category === "preselected_addon")
+                            ? "bg-rose-100 text-rose-700"
+                            : "bg-emerald-100 text-emerald-700"
+                        }`}
+                      >
+                        {result.status === "inconclusive" ? (
+                          <AlertTriangle className="h-6 w-6" />
+                        ) : (summary?.price_difference ?? 0) > 0 ? (
+                          <TrendingUp className="h-6 w-6" />
+                        ) : (
+                          <CheckCircle2 className="h-6 w-6" />
                         )}
                       </div>
 
-                      <h2 className="mt-1.5 text-xl sm:text-2xl font-bold text-slate-900">
-                        {result.status === "inconclusive"
-                          ? isLoginWall
-                            ? "Audit Halted Safely: Merchant Requires Sign-In"
-                            : "Checkout Analysis Inconclusive"
-                          : (summary?.price_difference ?? 0) > 0
-                          ? `Total increased by ${currency}${summary?.price_difference?.toLocaleString()} (+${summary?.percentage_increase}%)`
-                          : "Initial price matches final checkout total"}
-                      </h2>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
+                              result.status === "inconclusive"
+                                ? "bg-amber-100 text-amber-800"
+                                : (summary?.price_difference ?? 0) > 0
+                                ? "bg-rose-100 text-rose-800"
+                                : "bg-emerald-100 text-emerald-800"
+                            }`}
+                          >
+                            {result.status === "inconclusive"
+                              ? "Audit Status: Inconclusive"
+                              : (summary?.price_difference ?? 0) > 0
+                              ? "Verdict: Additional Surcharges Identified"
+                              : "Verdict: 100% Transparent Price Match"}
+                          </span>
+                          {result.raw_diagnostics?.evaluation_mode === "instant_intelligence" && (
+                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                              ⚡ Instant Analysis
+                            </span>
+                          )}
+                        </div>
 
-                      <p className="mt-1 text-xs sm:text-sm text-slate-600">
-                        {result.product_title ? `Product: ${result.product_title}` : `Target: ${result.url}`}
-                      </p>
-                    </div>
-                  </div>
+                        <h2 className="mt-1.5 text-xl sm:text-2xl font-bold text-slate-900">
+                          {result.status === "inconclusive"
+                            ? isLoginWall
+                              ? "Audit Halted Safely: Merchant Requires Sign-In"
+                              : "Checkout Analysis Inconclusive"
+                            : (summary?.price_difference ?? 0) > 0
+                            ? `Total increased by ${currency}${summary?.price_difference?.toLocaleString()} (+${summary?.percentage_increase}%)`
+                            : "Initial price matches final checkout total"}
+                        </h2>
 
-                  <button
-                    onClick={() => {
-                      setResult(null);
-                      setUrl("");
-                    }}
-                    className="shrink-0 flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 transition"
-                  >
-                    <RefreshCw className="h-3.5 w-3.5 text-slate-400" />
-                    <span>New Audit</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Login Wall Explanatory Callout Banner */}
-              {isLoginWall && (
-                <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 sm:p-6 shadow-xs">
-                  <div className="flex items-start gap-3.5">
-                    <div className="p-2.5 rounded-xl bg-amber-100 text-amber-800 shrink-0 mt-0.5">
-                      <Lock className="h-5 w-5" />
-                    </div>
-                    <div className="space-y-2 text-xs sm:text-sm">
-                      <h4 className="font-bold text-amber-900 text-base">Why Did TinySleuth Stop Here? (Safety Guardrail)</h4>
-                      <p className="text-amber-800 leading-relaxed">
-                        <strong>Amazon</strong>, <strong>Flipkart</strong>, and similar marketplaces enforce mandatory account login (password or phone OTP) before displaying the checkout screen with taxes, delivery fees, and order totals.
-                      </p>
-                      <p className="text-amber-800 leading-relaxed">
-                        🛡️ <strong>Zero Credential Policy:</strong> TinySleuth adheres to strict consumer safety standards. The AI agent intentionally halts immediately before requesting or entering your password, OTP, or credit card.
-                      </p>
-                      <div className="pt-2 border-t border-amber-200/80">
-                        <span className="font-semibold text-amber-900">💡 Best websites to audit with TinySleuth:</span>
-                        <p className="text-amber-800 mt-1">
-                          TinySleuth delivers the best full checkout audits on stores and services that support <strong>Guest Checkout</strong> — including <strong>Shopify & D2C stores</strong> (apparel, beauty, electronics), <strong>Flight & Hotel bookings</strong>, and <strong>Food delivery</strong> platforms where hidden fees and drip charges typically appear during checkout!
+                        <p className="mt-1 text-xs sm:text-sm text-slate-600">
+                          {result.product_title ? `Product: ${result.product_title}` : `Target: ${result.url}`}
                         </p>
                       </div>
                     </div>
-                  </div>
-                </div>
-              )}
 
-              {/* Price Summary Cards (5 Key Metrics) */}
-              {summary && (
-                <div className="grid grid-cols-2 lg:grid-cols-5 gap-3.5">
-                  {/* Initial Price */}
-                  <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
-                    <div className="flex items-center justify-between text-slate-500 mb-1">
-                      <span className="text-[11px] font-semibold uppercase tracking-wider">Initial Price</span>
-                      <ShoppingBag className="h-3.5 w-3.5 text-slate-400" />
-                    </div>
-                    <div className="text-xl sm:text-2xl font-bold text-slate-900">
-                      {summary.initial_price !== null && summary.initial_price !== undefined
-                        ? `${currency}${summary.initial_price.toLocaleString()}`
-                        : "N/A"}
-                    </div>
-                    <span className="text-[10px] text-slate-500">Advertised base rate</span>
-                  </div>
-
-                  {/* Final Checkout Total */}
-                  <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
-                    <div className="flex items-center justify-between text-slate-500 mb-1">
-                      <span className="text-[11px] font-semibold uppercase tracking-wider">Final Total</span>
-                      <Receipt className="h-3.5 w-3.5 text-slate-400" />
-                    </div>
-                    <div className="text-xl sm:text-2xl font-bold text-slate-900">
-                      {summary.final_displayed_total !== null && summary.final_displayed_total !== undefined
-                        ? `${currency}${summary.final_displayed_total.toLocaleString()}`
-                        : isLoginWall
-                        ? <span className="text-amber-700 text-lg sm:text-xl">Sign-in Wall</span>
-                        : "N/A"}
-                    </div>
-                    <span className="text-[10px] text-slate-500">
-                      {isLoginWall ? "Requires account login" : "At checkout screen"}
-                    </span>
-                  </div>
-
-                  {/* Mandatory Additional Charges */}
-                  <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
-                    <div className="flex items-center justify-between text-slate-500 mb-1">
-                      <span className="text-[11px] font-semibold uppercase tracking-wider">Mandatory Fees</span>
-                      <DollarSign className="h-3.5 w-3.5 text-slate-400" />
-                    </div>
-                    <div className="text-xl sm:text-2xl font-bold text-slate-900">
-                      {summary.final_displayed_total === null && result.status === "inconclusive" ? (
-                        <span className="text-slate-500 text-lg sm:text-xl">Unverified</span>
-                      ) : (
-                        `${currency}${summary.mandatory_charges_total.toLocaleString()}`
-                      )}
-                    </div>
-                    <span className="text-[10px] text-slate-500">
-                      {summary.final_displayed_total === null && result.status === "inconclusive"
-                        ? "Locked behind sign-in"
-                        : "Taxes, delivery, platform"}
-                    </span>
-                  </div>
-
-                  {/* Optional Selected Add-ons */}
-                  <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
-                    <div className="flex items-center justify-between text-slate-500 mb-1">
-                      <span className="text-[11px] font-semibold uppercase tracking-wider">Optional Selected</span>
-                      <SlidersHorizontal className="h-3.5 w-3.5 text-slate-400" />
-                    </div>
-                    <div className="text-xl sm:text-2xl font-bold text-slate-900">
-                      {summary.final_displayed_total === null && result.status === "inconclusive" ? (
-                        <span className="text-slate-500 text-lg sm:text-xl">Unverified</span>
-                      ) : (
-                        `${currency}${summary.optional_selected_charges_total.toLocaleString()}`
-                      )}
-                    </div>
-                    <span className="text-[10px] text-slate-500">
-                      {summary.final_displayed_total === null && result.status === "inconclusive"
-                        ? "Locked behind sign-in"
-                        : "Pre-ticked add-ons"}
-                    </span>
-                  </div>
-
-                  {/* Net Price Difference */}
-                  <div className="col-span-2 lg:col-span-1 rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
-                    <div className="flex items-center justify-between text-slate-500 mb-1">
-                      <span className="text-[11px] font-semibold uppercase tracking-wider">Net Difference</span>
-                      <TrendingUp className="h-3.5 w-3.5 text-slate-400" />
-                    </div>
-                    <div
-                      className={`text-xl sm:text-2xl font-bold ${
-                        summary.final_displayed_total === null && result.status === "inconclusive"
-                          ? "text-slate-500"
-                          : (summary.price_difference ?? 0) > 0
-                          ? "text-rose-600"
-                          : "text-emerald-600"
-                      }`}
+                    <button
+                      onClick={() => {
+                        setResult(null);
+                        setUrl("");
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      className="shrink-0 flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 transition"
                     >
-                      {summary.final_displayed_total === null && result.status === "inconclusive" ? (
-                        "—"
-                      ) : (summary.price_difference ?? 0) > 0 ? (
-                        `+${currency}${summary.price_difference?.toLocaleString()}`
-                      ) : (
-                        `${currency}0`
-                      )}
-                    </div>
-                    <span className="text-[10px] text-slate-500">
-                      {summary.final_displayed_total === null && result.status === "inconclusive"
-                        ? "Checkout not reached"
-                        : summary.percentage_increase
-                        ? `+${summary.percentage_increase}% markup`
-                        : "No price increase"}
-                    </span>
+                      <RefreshCw className="h-3.5 w-3.5 text-slate-400" />
+                      <span>New Audit</span>
+                    </button>
                   </div>
                 </div>
-              )}
 
-              {/* Itemized Charge Breakdown Table */}
-              {pricing && pricing.charges && pricing.charges.length > 0 && (
-                <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                        <Receipt className="h-4 w-4 text-blue-600" />
-                        <span>Itemized Checkout Fee Breakdown</span>
-                      </h3>
-                      <p className="text-xs text-slate-500">
-                        Line items, surcharges, and add-ons verified by TinyFish web agent during guest checkout.
-                      </p>
+                {/* Login Wall Explanatory Callout Banner */}
+                {isLoginWall && (
+                  <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 sm:p-6 shadow-xs">
+                    <div className="flex items-start gap-3.5">
+                      <div className="p-2.5 rounded-xl bg-amber-100 text-amber-800 shrink-0 mt-0.5">
+                        <Lock className="h-5 w-5" />
+                      </div>
+                      <div className="space-y-2 text-xs sm:text-sm">
+                        <h4 className="font-bold text-amber-900 text-base">Why Did TinySleuth Stop Here? (Safety Guardrail)</h4>
+                        <p className="text-amber-800 leading-relaxed">
+                          <strong>Amazon</strong>, <strong>Flipkart</strong>, and similar marketplaces enforce mandatory account login (password or phone OTP) before displaying the checkout screen with taxes, delivery fees, and order totals.
+                        </p>
+                        <p className="text-amber-800 leading-relaxed">
+                          🛡️ <strong>Zero Credential Policy:</strong> TinySleuth adheres to strict consumer safety standards. The AI agent intentionally halts immediately before requesting or entering your password, OTP, or credit card.
+                        </p>
+                        <div className="pt-2 border-t border-amber-200/80">
+                          <span className="font-semibold text-amber-900">💡 Best websites to audit with TinySleuth:</span>
+                          <p className="text-amber-800 mt-1">
+                            TinySleuth delivers the best full checkout audits on stores and services that support <strong>Guest Checkout</strong> — including <strong>Shopify & D2C stores</strong> (apparel, beauty, electronics), <strong>Flight & Hotel bookings</strong>, and <strong>Food delivery</strong> platforms where hidden fees and drip charges typically appear during checkout!
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <span className="text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-full">
-                      {pricing.charges.length} Line Items
-                    </span>
                   </div>
+                )}
 
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs border-collapse">
-                      <thead>
-                        <tr className="border-b border-slate-200 bg-slate-50/70 text-slate-600 font-semibold">
-                          <th className="py-2.5 px-3">Line Item</th>
-                          <th className="py-2.5 px-3">Amount</th>
-                          <th className="py-2.5 px-3">Classification</th>
-                          <th className="py-2.5 px-3">Requirement</th>
-                          <th className="py-2.5 px-3">Disclosure</th>
-                          <th className="py-2.5 px-3">Evidence Quote</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 text-slate-700">
-                        {pricing.charges.map((charge, idx) => (
-                          <tr key={idx} className="hover:bg-slate-50/50 transition">
-                            <td className="py-3 px-3 font-semibold text-slate-900">
-                              {charge.label}
-                            </td>
-                            <td className="py-3 px-3 font-bold text-slate-900">
-                              {charge.amount === 0 ? "FREE" : `${currency}${charge.amount.toLocaleString()}`}
-                            </td>
-                            <td className="py-3 px-3">
-                              <span className="capitalize text-slate-600">{charge.classification || "other"}</span>
-                            </td>
-                            <td className="py-3 px-3">
-                              {charge.mandatory === true ? (
-                                <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
-                                  Mandatory
-                                </span>
-                              ) : charge.mandatory === false ? (
-                                <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
-                                  Optional
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center rounded-md bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
-                                  Unknown
-                                </span>
-                              )}
-                              {charge.preselected && (
-                                <span className="ml-1 inline-flex items-center rounded-md bg-amber-50 border border-amber-200 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700">
-                                  Pre-ticked
-                                </span>
-                              )}
-                            </td>
-                            <td className="py-3 px-3">
-                              {charge.disclosed_before_checkout === true ? (
-                                <span className="text-emerald-700 font-medium">Disclosed Upfront</span>
-                              ) : charge.disclosed_before_checkout === false ? (
-                                <span className="text-rose-700 font-medium">Surprise at Checkout</span>
-                              ) : (
-                                <span className="text-slate-400">Unspecified</span>
-                              )}
-                            </td>
-                            <td className="py-3 px-3 max-w-xs text-slate-500 italic text-[11px] truncate" title={charge.evidence || ""}>
-                              {charge.evidence ? `"${charge.evidence}"` : "—"}
-                            </td>
+                {/* Price Summary Cards (5 Key Metrics) */}
+                {summary && (
+                  <div className="grid grid-cols-2 lg:grid-cols-5 gap-3.5">
+                    {/* Initial Price */}
+                    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
+                      <div className="flex items-center justify-between text-slate-500 mb-1">
+                        <span className="text-[11px] font-semibold uppercase tracking-wider">Initial Price</span>
+                        <ShoppingBag className="h-3.5 w-3.5 text-slate-400" />
+                      </div>
+                      <div className="text-xl sm:text-2xl font-bold text-slate-900">
+                        {summary.initial_price !== null && summary.initial_price !== undefined
+                          ? `${currency}${summary.initial_price.toLocaleString()}`
+                          : "N/A"}
+                      </div>
+                      <span className="text-[10px] text-slate-500">Advertised base rate</span>
+                    </div>
+
+                    {/* Final Checkout Total */}
+                    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
+                      <div className="flex items-center justify-between text-slate-500 mb-1">
+                        <span className="text-[11px] font-semibold uppercase tracking-wider">Final Total</span>
+                        <Receipt className="h-3.5 w-3.5 text-slate-400" />
+                      </div>
+                      <div className="text-xl sm:text-2xl font-bold text-slate-900">
+                        {summary.final_displayed_total !== null && summary.final_displayed_total !== undefined
+                          ? `${currency}${summary.final_displayed_total.toLocaleString()}`
+                          : isLoginWall
+                          ? <span className="text-amber-700 text-lg sm:text-xl">Sign-in Wall</span>
+                          : "N/A"}
+                      </div>
+                      <span className="text-[10px] text-slate-500">
+                        {isLoginWall ? "Requires account login" : "At checkout screen"}
+                      </span>
+                    </div>
+
+                    {/* Mandatory Additional Charges */}
+                    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
+                      <div className="flex items-center justify-between text-slate-500 mb-1">
+                        <span className="text-[11px] font-semibold uppercase tracking-wider">Mandatory Fees</span>
+                        <DollarSign className="h-3.5 w-3.5 text-slate-400" />
+                      </div>
+                      <div className="text-xl sm:text-2xl font-bold text-slate-900">
+                        {summary.final_displayed_total === null && result.status === "inconclusive" ? (
+                          <span className="text-slate-500 text-lg sm:text-xl">Unverified</span>
+                        ) : (
+                          `${currency}${summary.mandatory_charges_total.toLocaleString()}`
+                        )}
+                      </div>
+                      <span className="text-[10px] text-slate-500">
+                        {summary.final_displayed_total === null && result.status === "inconclusive"
+                          ? "Locked behind sign-in"
+                          : "Taxes, delivery, platform"}
+                      </span>
+                    </div>
+
+                    {/* Optional Selected Add-ons */}
+                    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
+                      <div className="flex items-center justify-between text-slate-500 mb-1">
+                        <span className="text-[11px] font-semibold uppercase tracking-wider">Optional Selected</span>
+                        <SlidersHorizontal className="h-3.5 w-3.5 text-slate-400" />
+                      </div>
+                      <div className="text-xl sm:text-2xl font-bold text-slate-900">
+                        {summary.final_displayed_total === null && result.status === "inconclusive" ? (
+                          <span className="text-slate-500 text-lg sm:text-xl">Unverified</span>
+                        ) : (
+                          `${currency}${summary.optional_selected_charges_total.toLocaleString()}`
+                        )}
+                      </div>
+                      <span className="text-[10px] text-slate-500">
+                        {summary.final_displayed_total === null && result.status === "inconclusive"
+                          ? "Locked behind sign-in"
+                          : "Pre-ticked add-ons"}
+                      </span>
+                    </div>
+
+                    {/* Net Price Difference */}
+                    <div className="col-span-2 lg:col-span-1 rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
+                      <div className="flex items-center justify-between text-slate-500 mb-1">
+                        <span className="text-[11px] font-semibold uppercase tracking-wider">Net Difference</span>
+                        <TrendingUp className="h-3.5 w-3.5 text-slate-400" />
+                      </div>
+                      <div
+                        className={`text-xl sm:text-2xl font-bold ${
+                          summary.final_displayed_total === null && result.status === "inconclusive"
+                            ? "text-slate-500"
+                            : (summary.price_difference ?? 0) > 0
+                            ? "text-rose-600"
+                            : "text-emerald-600"
+                        }`}
+                      >
+                        {summary.final_displayed_total === null && result.status === "inconclusive" ? (
+                          "—"
+                        ) : (summary.price_difference ?? 0) > 0 ? (
+                          `+${currency}${summary.price_difference?.toLocaleString()}`
+                        ) : (
+                          `${currency}0`
+                        )}
+                      </div>
+                      <span className="text-[10px] text-slate-500">
+                        {summary.final_displayed_total === null && result.status === "inconclusive"
+                          ? "Checkout not reached"
+                          : summary.percentage_increase
+                          ? `+${summary.percentage_increase}% markup`
+                          : "No price increase"}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Itemized Charge Breakdown Table */}
+                {pricing && pricing.charges && pricing.charges.length > 0 && (
+                  <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                          <Receipt className="h-4 w-4 text-indigo-600" />
+                          <span>Itemized Checkout Fee Breakdown</span>
+                        </h3>
+                        <p className="text-xs text-slate-500">
+                          Line items, surcharges, and add-ons verified by TinyFish web agent during guest checkout.
+                        </p>
+                      </div>
+                      <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">
+                        {pricing.charges.length} line items
+                      </span>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs">
+                        <thead>
+                          <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider text-[10px]">
+                            <th className="py-2.5 pr-4">Line Item Description</th>
+                            <th className="py-2.5 px-4">Amount</th>
+                            <th className="py-2.5 px-4">Type</th>
+                            <th className="py-2.5 px-4">Pre-selected</th>
+                            <th className="py-2.5 pl-4">Evidence Quote</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 text-slate-700">
+                          {pricing.charges.map((charge, idx) => (
+                            <tr key={idx} className="hover:bg-slate-50/60 transition">
+                              <td className="py-3 pr-4 font-semibold text-slate-900">{charge.label}</td>
+                              <td className="py-3 px-4 font-bold">
+                                {currency}
+                                {charge.amount.toLocaleString()}
+                              </td>
+                              <td className="py-3 px-4">
+                                {charge.mandatory === true ? (
+                                  <span className="inline-flex rounded bg-slate-100 px-2 py-0.5 font-medium text-slate-700">
+                                    Mandatory
+                                  </span>
+                                ) : charge.mandatory === false ? (
+                                  <span className="inline-flex rounded bg-amber-100 px-2 py-0.5 font-medium text-amber-800">
+                                    Optional Add-on
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex rounded bg-slate-100 px-2 py-0.5 font-medium text-slate-500">
+                                    Fee
+                                  </span>
+                                )}
+                              </td>
+                              <td className="py-3 px-4">
+                                {charge.preselected ? (
+                                  <span className="inline-flex items-center gap-1 font-semibold text-rose-600">
+                                    <AlertTriangle className="h-3.5 w-3.5" />
+                                    <span>Pre-ticked</span>
+                                  </span>
+                                ) : (
+                                  <span className="text-slate-400">No</span>
+                                )}
+                              </td>
+                              <td className="py-3 pl-4 text-slate-500 italic max-w-xs truncate">
+                                "{charge.evidence || "Observed on checkout screen"}"
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Evidence-Based Findings Cards */}
-              {result.findings && result.findings.length > 0 && (
+                {/* Evidence-Based Findings & Pattern Analysis */}
                 <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs">
-                  <h3 className="text-base font-bold text-slate-900 flex items-center gap-2 mb-1">
-                    <AlertTriangle className="h-4 w-4 text-amber-600" />
-                    <span>Evidence-Based Findings & Pattern Analysis</span>
-                  </h3>
-                  <p className="text-xs text-slate-500 mb-4">
-                    Findings identified through deterministic pricing rules and DOM inspection evidence.
-                  </p>
+                  <div className="mb-4">
+                    <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                      <AlertTriangle className="h-4 w-4 text-indigo-600" />
+                      <span>Evidence-Based Findings & Pattern Analysis</span>
+                    </h3>
+                    <p className="text-xs text-slate-500">Findings identified through deterministic pricing rules and DOM inspection evidence.</p>
+                  </div>
 
                   <div className="space-y-3">
                     {result.findings.map((finding) => (
                       <div
                         key={finding.id}
-                        className={`rounded-xl border p-4 transition ${
+                        className={`rounded-xl border p-4 text-xs transition ${
                           finding.severity === "potential_concern"
                             ? "border-rose-200 bg-rose-50/30"
                             : finding.severity === "needs_review"
                             ? "border-amber-200 bg-amber-50/30"
                             : finding.severity === "inconclusive"
-                            ? "border-amber-200 bg-amber-50/30"
-                            : "border-slate-200 bg-slate-50/30"
+                            ? "border-amber-200 bg-amber-50/20"
+                            : "border-slate-200 bg-slate-50/40"
                         }`}
                       >
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="flex items-center justify-between gap-2 mb-1.5">
                           <div className="flex items-center gap-2">
                             <span
-                              className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                              className={`rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
                                 finding.severity === "potential_concern"
                                   ? "bg-rose-100 text-rose-800"
                                   : finding.severity === "needs_review"
@@ -1014,152 +1030,133 @@ export default function App() {
                                   : "bg-emerald-100 text-emerald-800"
                               }`}
                             >
-                              {finding.severity.replace("_", " ")}
+                              {finding.severity}
                             </span>
-                            <h4 className="text-sm font-bold text-slate-900">{finding.title}</h4>
+                            <span className="font-bold text-slate-900 text-sm">{finding.title}</span>
                           </div>
-                          <span className="text-[11px] text-slate-500 font-medium">
-                            Confidence: <strong className="text-slate-700 capitalize">{finding.confidence}</strong>
-                          </span>
+                          <span className="text-[11px] text-slate-400 capitalize">Confidence: {finding.confidence}</span>
                         </div>
 
-                        <p className="mt-2 text-xs text-slate-600 leading-relaxed">
-                          {finding.explanation}
-                        </p>
+                        <p className="text-slate-600 leading-relaxed mb-2.5">{finding.explanation}</p>
 
                         {finding.evidence && (
-                          <div className="mt-2 text-xs text-slate-500 bg-white/70 border border-slate-200/60 rounded-md p-2 font-mono text-[11px]">
-                            <strong>Observed Evidence:</strong> {finding.evidence}
+                          <div className="rounded bg-white/80 border border-slate-200/60 p-2 text-slate-500 mb-2 font-mono text-[11px]">
+                            <span className="font-sans font-semibold text-slate-700">Observed Evidence:</span> {finding.evidence}
                           </div>
                         )}
 
-                        <div className="mt-2 text-xs text-slate-700 font-medium flex items-center gap-1.5 pt-1">
-                          <ArrowRight className="h-3 w-3 text-blue-600" />
-                          <span><strong>Recommended Action:</strong> {finding.suggested_action}</span>
+                        <div className="text-slate-700 font-medium flex items-center gap-1.5 text-[11px]">
+                          <span className="text-indigo-600">→ Recommended Action:</span>
+                          <span>{finding.suggested_action}</span>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
-              )}
 
-              {/* Plain-Language Audit Summary & Official Disclaimer */}
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs">
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2 mb-2">
-                  <FileText className="h-4 w-4 text-blue-600" />
-                  <span>Executive Audit Summary</span>
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed bg-slate-50 rounded-xl p-4 border border-slate-100">
-                  {result.summary_report}
-                </p>
+                {/* Raw Diagnostics JSON Toggle */}
+                <div className="pt-2 text-right">
+                  <button
+                    type="button"
+                    onClick={() => setShowRawJson(!showRawJson)}
+                    className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 font-medium"
+                  >
+                    <span>{showRawJson ? "Hide" : "View"} Raw Audit Diagnostics</span>
+                    <ChevronDown className={`h-3.5 w-3.5 transition ${showRawJson ? "rotate-180" : ""}`} />
+                  </button>
 
-                <div className="mt-4 pt-4 border-t border-slate-100 flex items-start gap-2.5 text-[11px] text-slate-500">
-                  <ShieldCheck className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
-                  <p>
-                    <strong>Transparency Disclaimer:</strong> TinySleuth inspects online checkout flows as an independent diagnostic assistant. It does not complete purchases, enter financial credentials, or guarantee absence of all unobserved merchant fees that may require account authentication.
-                  </p>
-                </div>
-              </div>
-
-              {/* Collapsible Sanitized Diagnostics (For Auditors / Developers) */}
-              <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-xs">
-                <button
-                  type="button"
-                  onClick={() => setShowRawJson(!showRawJson)}
-                  className="w-full flex items-center justify-between p-4 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition"
-                >
-                  <span className="flex items-center gap-2">
-                    <Info className="h-4 w-4 text-blue-600" />
-                    <span>View Raw Audit JSON Payload & Diagnostics</span>
-                  </span>
-                  <span className="flex items-center gap-1 text-slate-400">
-                    {showRawJson ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                  </span>
-                </button>
-
-                <AnimatePresence>
                   {showRawJson && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="p-4 border-t border-slate-200 bg-slate-900 text-slate-200"
-                    >
-                      <div className="flex items-center justify-between pb-2">
-                        <span className="text-[11px] font-mono text-slate-400">Sanitized Response Object</span>
-                        <button
-                          type="button"
-                          onClick={copyJson}
-                          className="flex items-center gap-1 rounded bg-slate-800 px-2.5 py-1 text-[11px] font-medium text-slate-300 hover:bg-slate-700 transition"
-                        >
-                          {copied ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
-                          <span>{copied ? "Copied" : "Copy JSON"}</span>
-                        </button>
-                      </div>
-                      <pre className="max-h-80 overflow-auto rounded-lg bg-slate-950 p-3 text-xs font-mono text-emerald-400 border border-slate-800">
-                        {JSON.stringify(result, null, 2)}
-                      </pre>
-                    </motion.div>
+                    <div className="mt-3 text-left rounded-xl border border-slate-200 bg-slate-900 p-4 text-xs font-mono text-emerald-400 relative overflow-x-auto">
+                      <button
+                        onClick={copyJson}
+                        className="absolute top-3 right-3 rounded bg-slate-800 hover:bg-slate-700 px-2 py-1 text-[11px] text-slate-200 flex items-center gap-1 transition"
+                      >
+                        {copied ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+                        <span>{copied ? "Copied" : "Copy JSON"}</span>
+                      </button>
+                      <pre>{JSON.stringify(result, null, 2)}</pre>
+                    </div>
                   )}
-                </AnimatePresence>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
-        {/* HOW IT WORKS SECTION */}
-        <section id="how-it-works" className="mt-16 pt-10 border-t border-slate-200 text-center">
-          <span className="text-xs font-bold uppercase tracking-wider text-blue-600">Architecture & Transparency</span>
-          <h2 className="mt-1.5 text-2xl font-bold text-slate-900">How TinySleuth Works</h2>
-          <p className="mt-2 text-xs sm:text-sm text-slate-600 max-w-xl mx-auto">
-            Combining TinyFish autonomous web agents, SSRF-hardened FastAPI backend, and deterministic pricing math.
-          </p>
+        {/* 6. Feature Pillars Section */}
+        <section id="features" className="mt-24 pt-12 border-t border-slate-200/60">
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">Core Capabilities</span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">Autonomous Pricing Inspection</h2>
+          </div>
 
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600 mb-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 mb-4">
                 <Search className="h-5 w-5" />
               </div>
-              <h3 className="text-sm font-bold text-slate-900">Headless Browser Agent</h3>
-              <p className="mt-1.5 text-xs text-slate-500 leading-relaxed">
-                TinyFish autonomous agent opens the destination page in a cloud container, captures the base price, and adds the product to cart as a guest.
+              <h3 className="text-base font-bold text-slate-900">1. Inspect</h3>
+              <p className="mt-2 text-xs sm:text-sm text-slate-500 leading-relaxed">
+                TinyFish autonomous web agent navigates the real merchant page as a guest without touching payment details or submitting orders.
               </p>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 mb-3">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 mb-4">
+                <SlidersHorizontal className="h-5 w-5" />
+              </div>
+              <h3 className="text-base font-bold text-slate-900">2. Compare</h3>
+              <p className="mt-2 text-xs sm:text-sm text-slate-500 leading-relaxed">
+                Calculates mathematical discrepancies between initially advertised sticker prices and final checkout screens down to the penny.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600 mb-4">
                 <ShieldCheck className="h-5 w-5" />
               </div>
-              <h3 className="text-sm font-bold text-slate-900">Zero Payment Risk</h3>
-              <p className="mt-1.5 text-xs text-slate-500 leading-relaxed">
-                The agent adheres to safety rules: It halts immediately if OTP, payment card, or login is demanded. Incomplete flows are marked Inconclusive.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-50 text-violet-600 mb-3">
-                <TrendingUp className="h-5 w-5" />
-              </div>
-              <h3 className="text-sm font-bold text-slate-900">Evidence Rule Engine</h3>
-              <p className="mt-1.5 text-xs text-slate-500 leading-relaxed">
-                Our backend calculates mathematical price differences ($F - I$), cataloging surprise surcharges and pre-selected add-ons with verbatim DOM proof.
+              <h3 className="text-base font-bold text-slate-900">3. Understand</h3>
+              <p className="mt-2 text-xs sm:text-sm text-slate-500 leading-relaxed">
+                Identifies surprise convenience fees, pre-ticked add-ons, and dark patterns with quoted evidence and actionable guidance.
               </p>
             </div>
           </div>
         </section>
+
+        {/* 7. Fair by Design & Safety Guardrails */}
+        <section id="fair-by-design" className="mt-16 rounded-3xl border border-indigo-100 bg-gradient-to-r from-indigo-50/50 via-purple-50/30 to-blue-50/40 p-8 sm:p-10">
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-indigo-700 shadow-xs mb-4">
+              <Lock className="h-3.5 w-3.5" />
+              <span>Consumer Privacy & Safety Standard</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">Strict Consumer Safety Protocols</h2>
+            <p className="mt-3 text-sm text-slate-600 leading-relaxed">
+              TinySleuth is designed strictly as a consumer advocacy auditor. The agent operates strictly in read-only guest inspection mode:
+              it halts immediately if personal passwords, SMS OTPs, or payment card credentials are required. No financial accounts are ever accessed or compromised.
+            </p>
+          </div>
+        </section>
       </main>
 
-      {/* Footer */}
-      <footer className="mt-16 border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-500">
-        <div className="mx-auto max-w-5xl px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      {/* 8. Footer */}
+      <footer className="border-t border-slate-200 bg-white py-8 text-center text-xs text-slate-500">
+        <div className="mx-auto max-w-7xl px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-900">TinySleuth</span>
-            <span>— Know the Real Price Before You Pay</span>
+            <span className="font-bold text-slate-800">TinySleuth</span>
+            <span>— AI-Powered Checkout Price Transparency Auditor</span>
           </div>
-          <div className="flex items-center gap-3 text-slate-400">
-            <span>Powered by TinyFish Web Agents</span>
-            <span>•</span>
-            <span>FastAPI & React</span>
+          <div className="flex items-center gap-4 text-slate-600">
+            <a
+              href="https://github.com/Divyanshu18-code/TinySleuth"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 hover:text-indigo-600 transition"
+            >
+              <span>GitHub</span>
+              <ExternalLink className="h-3 w-3 text-slate-400" />
+            </a>
+            <span>Powered by TinyFish AI Web Agent</span>
           </div>
         </div>
       </footer>
