@@ -1,70 +1,122 @@
-"""Thin client for the TinyFish Agent API.
+"""Client for the TinyFish Web Agent API.
 
 Docs: https://docs.tinyfish.ai/agent-api
-Auth: X-API-Key header. Blocking endpoint: POST /v1/automation/run
+Endpoint: POST /v1/automation/run
+Authentication: X-API-Key header
 """
 
 import httpx
-
+from typing import Any
 from app.core.config import get_settings
 from app.models.schemas import TinyFishRun
 
 AUDIT_GOAL = """
-You are auditing the checkout price of a shopping or booking website.
-Do NOT submit payment. Do NOT enter login credentials, OTPs or card details.
-If a step requires login, OTP or payment details, stop and report it in blocked_reason.
+You are an evidence-based checkout pricing auditor. Your task is to inspect this product/booking page and proceed through guest checkout to discover all added charges and preselected add-ons.
 
-Steps:
-1. Read the displayed product price on this page (initial_price).
-2. Add the item to cart / proceed toward checkout as a guest, as far as possible without logging in.
-3. Record every extra line item you can see (shipping, handling, service fee, taxes, protection plans, add-ons).
-   For each: label, amount, whether it is mandatory or optional, whether it was preselected,
-   whether it was disclosed before checkout, and a short evidence note (the text you saw).
-4. Record the final displayed total (final_displayed_total).
+STRICT SAFETY RULES:
+1. Do NOT submit any final order or payment.
+2. Do NOT enter payment card numbers, bank details, or CVVs.
+3. Do NOT enter or request SMS OTPs or authenticator codes.
+4. Do NOT attempt to bypass CAPTCHA or security challenges.
+5. If the site mandates user login, phone OTP, or credit card info to progress, STOP immediately and record the exact blocker in blocked_reason.
+6. Never guess numbers. If an amount cannot be observed with certainty, set it to null.
 
-Return ONLY JSON in this shape:
-{
-  "currency": "INR",
-  "initial_price": 0,
-  "final_displayed_total": 0,
-  "reached_checkout": true,
-  "blocked_reason": null,
-  "charges": [
-    {"label": "", "amount": 0, "mandatory": true, "preselected": false,
-     "disclosed_before_checkout": true, "evidence": ""}
-  ]
-}
-Use null for anything you could not observe. Never guess values.
+AUDIT STEPS:
+1. Extract the product/booking title (product_title) and currency (e.g. INR, USD, EUR, etc.).
+2. Record the initially advertised base price (initial_price).
+3. Add the item to cart and proceed towards guest checkout as far as allowed without payment credentials or OTP.
+4. Record whether you successfully reached the checkout total screen (reached_checkout).
+5. Inspect every added line item (taxes, shipping, convenience fee, platform fee, booking charge, insurance, protection plan, charity donation):
+   - label: Exact name of the charge
+   - amount: Numerical charge amount
+   - mandatory: true if required, false if optional add-on, null if unclear
+   - preselected: true if an optional checkmark or add-on was already pre-selected by default
+   - disclosed_before_checkout: true if disclosed on the initial page, false if it first appeared at checkout
+   - evidence: Exact quote or text snippet seen in the webpage
+6. Record the final displayed checkout total (final_displayed_total).
+7. If stopped by auth/OTP/payment, explain in blocked_reason.
 """.strip()
+
+OUTPUT_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "product_title": {"type": ["string", "null"]},
+        "currency": {"type": ["string", "null"]},
+        "initial_price": {"type": ["number", "null"]},
+        "final_displayed_total": {"type": ["number", "null"]},
+        "reached_checkout": {"type": "boolean"},
+        "blocked_reason": {"type": ["string", "null"]},
+        "charges": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "label": {"type": "string"},
+                    "amount": {"type": "number"},
+                    "classification": {"type": "string"},
+                    "mandatory": {"type": ["boolean", "null"]},
+                    "preselected": {"type": "boolean"},
+                    "disclosed_before_checkout": {"type": ["boolean", "null"]},
+                    "evidence": {"type": ["string", "null"]},
+                },
+                "required": ["label", "amount"],
+            },
+        },
+    },
+    "required": ["reached_checkout"],
+}
 
 
 class TinyFishError(Exception):
+    """Clean domain exception without secret leakage."""
     pass
 
 
 async def run_audit(url: str) -> TinyFishRun:
+    """Execute synchronous goal-based audit via TinyFish Agent API."""
     settings = get_settings()
-    if not settings.tinyfish_api_key:
-        raise TinyFishError("TINYFISH_API_KEY is not set. Add it to backend/.env")
+    if not settings.tinyfish_api_key or settings.tinyfish_api_key == "your_tinyfish_api_key_here":
+        raise TinyFishError("TINYFISH_API_KEY is not set. Please add a valid key in backend/.env")
 
-    endpoint = f"{settings.tinyfish_base_url}/v1/automation/run"
-    headers = {"X-API-Key": settings.tinyfish_api_key, "Content-Type": "application/json"}
-    payload = {"url": url, "goal": AUDIT_GOAL}
+    endpoint = f"{settings.tinyfish_base_url.rstrip('/')}/v1/automation/run"
+    headers = {
+        "X-API-Key": settings.tinyfish_api_key,
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "url": url,
+        "goal": AUDIT_GOAL,
+        "output_schema": OUTPUT_SCHEMA,
+        "agent_config": {
+            "mode": "strict",
+            "max_steps": 40,
+            "max_duration_seconds": min(settings.tinyfish_timeout_seconds, 240),
+        },
+    }
 
     try:
         async with httpx.AsyncClient(timeout=settings.tinyfish_timeout_seconds) as client:
             resp = await client.post(endpoint, headers=headers, json=payload)
     except httpx.TimeoutException as exc:
-        raise TinyFishError("TinyFish run timed out") from exc
+        raise TinyFishError(f"TinyFish inspection timed out after {settings.tinyfish_timeout_seconds} seconds.") from exc
     except httpx.HTTPError as exc:
-        raise TinyFishError(f"Could not reach TinyFish: {exc}") from exc
+        raise TinyFishError(f"Network error communicating with TinyFish: {exc}") from exc
 
+    if resp.status_code == 401:
+        raise TinyFishError("TinyFish authentication failed: Invalid or expired API key. Please verify backend/.env")
+    if resp.status_code == 429:
+        raise TinyFishError("TinyFish rate limit or credit quota exceeded. Please check your account quota.")
     if resp.status_code >= 400:
-        raise TinyFishError(f"TinyFish returned {resp.status_code}: {resp.text[:300]}")
+        clean_text = resp.text[:300].replace(settings.tinyfish_api_key, "***")
+        raise TinyFishError(f"TinyFish returned status {resp.status_code}: {clean_text}")
 
     data = resp.json()
+    status_str = str(data.get("status", "UNKNOWN")).upper()
+
     return TinyFishRun(
-        status=str(data.get("status", "UNKNOWN")),
+        run_id=data.get("run_id"),
+        status=status_str,
         result=data.get("result"),
+        error=data.get("error"),
         raw=data,
     )
