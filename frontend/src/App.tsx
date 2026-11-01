@@ -482,19 +482,24 @@ export default function App() {
         </div>
       </header>
 
-      {/* 2. Hero Section — Left Copy & Input + Right Rotating 3D Glass Sculpture */}
-      <main className="relative z-10 mx-auto max-w-7xl px-4 sm:px-8 pt-8 sm:pt-14 pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-center min-h-[580px]">
-          {/* Left Column: Bold Headline, Subtitle, Dark Glass URL Bar & Quick Demotags */}
-          <div className="lg:col-span-7 space-y-6">
+      {/* 2. Hero Section with 3D Animation Running in Background */}
+      <main className="relative z-10 mx-auto max-w-7xl px-4 sm:px-8 pt-6 sm:pt-12 pb-16">
+        <div className="relative min-h-[580px] lg:min-h-[640px] flex items-center">
+          {/* 3D Glass Sculpture Running Transparently in the Background */}
+          <div className="absolute right-[-8%] sm:right-[-4%] lg:right-[0%] top-1/2 -translate-y-1/2 w-[380px] sm:w-[540px] lg:w-[680px] h-[380px] sm:h-[540px] lg:h-[680px] pointer-events-none z-0 flex items-center justify-center">
+            <ThreeDPriceStack isAuditing={loading} />
+          </div>
+
+          {/* Foreground Content: All Text and Objects Floating Over 3D Background */}
+          <div className="relative z-10 max-w-2xl lg:max-w-3xl space-y-6">
             {/* Kicker with Glowing Emerald Dot */}
-            <div className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 tracking-wide">
+            <div className="inline-flex items-center gap-2 text-xs font-semibold text-slate-300 tracking-wide bg-white/[0.05] backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10 shadow-lg">
               <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
               <span>AI Infrastructure for Truth · Autonomous Checkout Auditor</span>
             </div>
 
-            {/* Display Headline (Space Grotesk Tech Display) */}
-            <h1 className="text-4xl sm:text-6xl lg:text-[68px] font-black text-white tracking-tight leading-[1.04]">
+            {/* Display Headline (Space Grotesk Tech Display) Floating Over 3D Background */}
+            <h1 className="text-4xl sm:text-6xl lg:text-[72px] font-black text-white tracking-tight leading-[1.03] drop-shadow-[0_10px_35px_rgba(0,0,0,0.85)]">
               Inspect, Expose &<br />
               Audit Truth with<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400">
@@ -502,14 +507,14 @@ export default function App() {
               </span>
             </h1>
 
-            {/* Subtitle */}
-            <p className="text-sm sm:text-base text-slate-400 font-normal leading-relaxed max-w-xl">
+            {/* Subtitle Floating Over 3D Background */}
+            <p className="text-sm sm:text-base text-slate-300 font-normal leading-relaxed max-w-xl drop-shadow-[0_4px_12px_rgba(0,0,0,0.7)]">
               Our advanced AI engine inspects e-commerce checkouts in real time, uncovers hidden mandatory fees and
               pre-ticked add-ons, and gives you transparent truth before you pay.
             </p>
 
-            {/* High-End Dark Frosted Glass URL Input Bar */}
-            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-2 backdrop-blur-2xl shadow-2xl focus-within:border-white/25 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all max-w-xl">
+            {/* High-End Dark Frosted Glass URL Input Bar — Floating over 3D background */}
+            <div className="rounded-2xl border border-white/15 bg-black/65 p-2 backdrop-blur-2xl shadow-2xl focus-within:border-white/30 focus-within:ring-2 focus-within:ring-blue-500/25 transition-all max-w-xl">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -564,7 +569,7 @@ export default function App() {
 
             {/* Instant Mode Notice for Amazon / Flipkart */}
             {isAmazonOrFlipkart && (
-              <div className="flex items-start gap-2.5 rounded-xl bg-blue-950/40 border border-blue-500/30 p-3 text-xs text-blue-200 max-w-xl">
+              <div className="flex items-start gap-2.5 rounded-xl bg-blue-950/60 backdrop-blur-xl border border-blue-500/30 p-3 text-xs text-blue-200 max-w-xl shadow-lg">
                 <ShieldCheck className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
                 <div>
                   <strong>⚡ Instant Safety Audit:</strong> This merchant mandates user account login before displaying checkout totals. TinySleuth evaluates this in &lt;1 second under our zero-credential consumer safety guardrails.
@@ -576,7 +581,7 @@ export default function App() {
             {(url.toLowerCase().includes("google.com/search") ||
               url.toLowerCase().includes("google.com/shopping") ||
               url.toLowerCase().includes("bing.com")) && (
-              <div className="flex items-start gap-2.5 rounded-xl bg-amber-950/40 border border-amber-500/30 p-3 text-xs text-amber-200 max-w-xl">
+              <div className="flex items-start gap-2.5 rounded-xl bg-amber-950/60 backdrop-blur-xl border border-amber-500/30 p-3 text-xs text-amber-200 max-w-xl shadow-lg">
                 <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
                 <div>
                   <strong>Notice:</strong> You pasted a search aggregator link. Search engines block automated browsers with reCAPTCHA. Please paste the direct store URL (e.g. <em>Amazon</em>, <em>Croma</em>, <em>Flipkart</em>) for a successful checkout audit.
@@ -586,7 +591,7 @@ export default function App() {
 
             {/* Error Message Alert */}
             {error && (
-              <div className="flex items-start gap-3 rounded-xl border border-red-500/40 bg-red-950/40 p-4 text-xs text-red-200 max-w-xl">
+              <div className="flex items-start gap-3 rounded-xl border border-red-500/40 bg-red-950/60 backdrop-blur-xl p-4 text-xs text-red-200 max-w-xl shadow-lg">
                 <AlertTriangle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
                 <div className="flex-1">
                   <span className="font-semibold text-red-300">Audit Request Error:</span> {error}
@@ -594,7 +599,7 @@ export default function App() {
               </div>
             )}
 
-            {/* Demo Evaluator Buttons */}
+            {/* Demo Evaluator Buttons — Floating Frosted Pills */}
             <div className="pt-1 flex flex-col sm:flex-row items-start sm:items-center gap-2.5 text-xs max-w-xl">
               <span className="text-slate-400 font-medium flex items-center gap-1.5 shrink-0">
                 <Info className="h-3.5 w-3.5 text-slate-500" />
@@ -610,7 +615,7 @@ export default function App() {
                       setUrl(scenario.url);
                       handleAudit(scenario.url, scenario.data);
                     }}
-                    className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-slate-300 font-medium hover:border-white/30 hover:bg-white/[0.08] hover:text-white transition disabled:opacity-50 text-[11px]"
+                    className="rounded-full border border-white/10 bg-black/40 backdrop-blur-md px-3 py-1 text-slate-300 font-medium hover:border-white/30 hover:bg-white/[0.08] hover:text-white transition disabled:opacity-50 text-[11px]"
                   >
                     <span>{scenario.badge}</span>
                   </button>
@@ -619,20 +624,15 @@ export default function App() {
             </div>
 
             {/* Strict Safety Guardrail Note */}
-            <div className="flex items-center gap-2 text-[11px] text-slate-500 max-w-xl pt-1">
+            <div className="flex items-center gap-2 text-[11px] text-slate-400 max-w-xl pt-1">
               <Lock className="h-3 w-3 text-slate-500 shrink-0" />
               <span>Strict consumer safety guardrails: Never submits card details or places orders.</span>
             </div>
           </div>
-
-          {/* Right Column: Circular 3D Glass Sculpture matching user's exact specification */}
-          <div className="lg:col-span-5 relative flex items-center justify-center py-4 sm:py-6">
-            <ThreeDPriceStack isAuditing={loading} />
-          </div>
         </div>
 
-        {/* 3. Bottom 3-Counter Stats Row (Exact match to reference video counters) */}
-        <section className="mt-16 sm:mt-24 pt-10 border-t border-white/[0.08] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
+        {/* 3. Bottom 3-Counter Stats Row (Floating in Foreground) */}
+        <section className="relative z-10 mt-16 sm:mt-24 pt-10 border-t border-white/[0.08] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-16 w-full max-w-3xl">
             {/* Stat 1 */}
             <div>

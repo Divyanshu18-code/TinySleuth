@@ -22,17 +22,16 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
     const container = mountRef.current;
     if (!container) return;
 
-    const width = container.clientWidth || 520;
-    const height = container.clientHeight || 520;
+    const width = container.clientWidth || 640;
+    const height = container.clientHeight || 640;
 
-    // 1. Scene & Perspective Camera Setup
-    // Adjusted camera distance so the 3D sculpture fits entirely inside the circular frame with breathing room
+    // 1. Scene & Perspective Camera Setup (Transparent background)
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 100);
-    camera.position.set(0, 0, 8.4);
-    camera.lookAt(0, 0, 0);
+    camera.position.set(0.2, 0, 7.8);
+    camera.lookAt(0.2, 0, 0);
 
-    // 2. High-Performance WebGL Renderer with Filmic Tone Mapping
+    // 2. High-Performance WebGL Renderer with Alpha Transparency
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
@@ -40,6 +39,7 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
     });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x000000, 0); // 100% transparent background
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.45;
     renderer.shadowMap.enabled = true;
@@ -47,13 +47,11 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
     container.appendChild(renderer.domElement);
 
     // 3. Programmatic High-Contrast Studio Environment Map
-    // Generates molten copper, neon green, and electric blue specular reflections
     const envCanvas = document.createElement("canvas");
     envCanvas.width = 512;
     envCanvas.height = 256;
     const ctx = envCanvas.getContext("2d");
     if (ctx) {
-      // Dark space gradient
       const bgGrad = ctx.createLinearGradient(0, 0, 512, 256);
       bgGrad.addColorStop(0, "#05040d");
       bgGrad.addColorStop(0.5, "#090818");
@@ -61,7 +59,7 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, 512, 256);
 
-      // Intense Molten Copper / Amber Softbox (Upper-Right Crest)
+      // Molten Copper / Amber Softbox (Upper-Right Crest)
       const copperGrad = ctx.createRadialGradient(420, 50, 2, 420, 50, 130);
       copperGrad.addColorStop(0, "rgba(255, 150, 10, 1.0)");
       copperGrad.addColorStop(0.35, "rgba(245, 120, 0, 0.75)");
@@ -105,7 +103,7 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
     copperRimLight.position.set(6.0, 7.0, 4.0);
     scene.add(copperRimLight);
 
-    // Upper Copper Point Light (Direct specular hit on curvature)
+    // Upper Copper Point Light (Direct specular hit on outer curvature)
     const copperPointLight = new THREE.PointLight(0xff7800, 5.5, 16);
     copperPointLight.position.set(3.5, 4.5, 3.5);
     scene.add(copperPointLight);
@@ -115,7 +113,7 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
     royalBlueLight.position.set(-4.5, -3.5, 3.0);
     scene.add(royalBlueLight);
 
-    // Center Aperture: Brilliant Neon Green / Lime Glow (Shines out from inner eye)
+    // Center Aperture: Brilliant Neon Green / Lime Glow
     const neonGreenCore = new THREE.PointLight(0x22c55e, 6.5, 12);
     neonGreenCore.position.set(0.4, 0.1, 0.2);
     scene.add(neonGreenCore);
@@ -130,14 +128,14 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
     plumBackLight.position.set(0, 2.5, -4.5);
     scene.add(plumBackLight);
 
-    // 5. Ambient Stardust Floating Particles (Running in background of circle)
-    const particleCount = 75;
+    // 5. Floating Ambient Stardust Particles (Drifting in the background)
+    const particleCount = 80;
     const particleGeom = new THREE.BufferGeometry();
     const particlePositions = new Float32Array(particleCount * 3);
     const particleColors = new Float32Array(particleCount * 3);
 
     for (let i = 0; i < particleCount; i++) {
-      const r = 1.0 + Math.random() * 2.8;
+      const r = 1.0 + Math.random() * 3.2;
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(Math.random() * 2 - 1);
       particlePositions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
@@ -173,20 +171,19 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
     const particles = new THREE.Points(particleGeom, particleMat);
     scene.add(particles);
 
-    // 6. 3D Master Sculpture Group (Smooth Organic Loop Sized Proportionally)
+    // 6. 3D Master Sculpture Group (Smooth Organic Loop)
     const masterGroup = new THREE.Group();
     scene.add(masterGroup);
 
     // --- OUTER SHELL: Thick, Sweeping Smoked Obsidian Glass ---
-    // Proportioned so it fits comfortably inside the circular aperture without any edge clipping
-    const outerKnotGeom = new THREE.TorusKnotGeometry(1.85, 0.68, 240, 56, 2, 3);
+    const outerKnotGeom = new THREE.TorusKnotGeometry(1.95, 0.72, 240, 56, 2, 3);
     const outerGlassMat = new THREE.MeshPhysicalMaterial({
       color: 0x050711,
       emissive: 0x010205,
       roughness: 0.02,
       metalness: 0.08,
-      transmission: 0.93, // Liquid glass refraction
-      ior: 1.62, // Heavy refractive glass
+      transmission: 0.93,
+      ior: 1.62,
       thickness: 3.0,
       clearcoat: 1.0,
       clearcoatRoughness: 0.02,
@@ -200,7 +197,7 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
     masterGroup.add(outerGlassMesh);
 
     // --- INNER LUMINOUS NEON GREEN / LIME CHANNEL ---
-    const innerKnotGeom1 = new THREE.TorusKnotGeometry(1.83, 0.24, 180, 32, 2, 3);
+    const innerKnotGeom1 = new THREE.TorusKnotGeometry(1.93, 0.25, 180, 32, 2, 3);
     const innerNeonMat1 = new THREE.MeshStandardMaterial({
       color: 0x22c55e,
       emissive: 0x16a34a,
@@ -212,7 +209,7 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
     masterGroup.add(innerNeonMesh1);
 
     // --- INNER APERTURE GREEN GLOW IRIS ---
-    const irisGeom = new THREE.TorusGeometry(1.2, 0.14, 24, 64);
+    const irisGeom = new THREE.TorusGeometry(1.25, 0.15, 24, 64);
     const irisMat = new THREE.MeshStandardMaterial({
       color: 0x4ade80,
       emissive: 0x22c55e,
@@ -226,7 +223,7 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
     masterGroup.add(irisMesh);
 
     // --- INNER ELECTRIC ROYAL BLUE FILAMENT ---
-    const innerKnotGeom2 = new THREE.TorusKnotGeometry(1.86, 0.14, 160, 24, 2, 3);
+    const innerKnotGeom2 = new THREE.TorusKnotGeometry(1.96, 0.15, 160, 24, 2, 3);
     const innerNeonMat2 = new THREE.MeshStandardMaterial({
       color: 0x0055ff,
       emissive: 0x0044ee,
@@ -240,7 +237,7 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
     masterGroup.add(innerNeonMesh2);
 
     // --- OUTER SPECULAR ORBITAL HALO RING ---
-    const haloGeom = new THREE.TorusGeometry(2.85, 0.018, 16, 120);
+    const haloGeom = new THREE.TorusGeometry(2.95, 0.018, 16, 120);
     const haloMat = new THREE.MeshBasicMaterial({
       color: 0x38bdf8,
       transparent: true,
@@ -250,17 +247,17 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
     haloMesh.rotation.x = Math.PI / 2.3;
     masterGroup.add(haloMesh);
 
-    // 7. Interactive Parallax Mouse Listener
+    // 7. Window-Level Interactive Parallax Mouse Listener
+    // Tracks mouse across the whole page so moving anywhere tilts the background sculpture
     const handleMouseMove = (e: MouseEvent) => {
-      const rect = container.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-      const y = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
+      const x = (e.clientX / window.innerWidth) * 2 - 1;
+      const y = -((e.clientY / window.innerHeight) * 2 - 1);
       mouseTargetRef.current = { x: Math.max(-1, Math.min(1, x)), y: Math.max(-1, Math.min(1, y)) };
     };
 
-    container.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove);
 
-    // 8. Render Animation Loop — Continuous 360° Fluid Rotation ("Gol Gol Ghumna")
+    // 8. Render Animation Loop — Continuous 360° Fluid Rotation in Background
     let animationFrameId: number;
     const clock = new THREE.Clock();
     let lastTime = performance.now();
@@ -290,7 +287,7 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
       // Gentle floating levitation motion
       masterGroup.position.y = Math.sin(elapsed * 1.0) * 0.1;
 
-      // Ambient background particles drift
+      // Ambient background stardust drift
       particles.rotation.y = elapsed * 0.08;
       particles.rotation.x = Math.sin(elapsed * 0.06) * 0.1;
 
@@ -327,7 +324,7 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
 
     return () => {
       cancelAnimationFrame(animationFrameId);
-      container.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mousemove", handleMouseMove);
       resizeObserver.disconnect();
       renderer.dispose();
       outerKnotGeom.dispose();
@@ -350,19 +347,9 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
   }, []);
 
   return (
-    <div className={`relative flex items-center justify-center select-none ${className}`}>
-      {/* Outer ambient decorative glowing orbit rings */}
-      <div className="absolute w-[360px] h-[360px] sm:w-[480px] sm:h-[480px] lg:w-[560px] lg:h-[560px] rounded-full border border-blue-500/20 blur-[2px] pointer-events-none animate-pulse" />
-      <div className="absolute w-[390px] h-[390px] sm:w-[510px] sm:h-[510px] lg:w-[590px] lg:h-[590px] rounded-full border border-emerald-500/15 pointer-events-none" />
-
-      {/* Main Circular Portal — Perfectly round container with zero box clipping */}
-      <div className="relative w-[320px] h-[320px] sm:w-[440px] sm:h-[440px] lg:w-[520px] lg:h-[520px] rounded-full border border-white/15 bg-black/60 shadow-[0_0_100px_rgba(37,99,235,0.25)] overflow-hidden flex items-center justify-center backdrop-blur-2xl">
-        {/* Soft inner radial gradient glow */}
-        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_60%_40%,rgba(245,158,11,0.12)_0%,rgba(34,197,94,0.08)_35%,rgba(37,99,235,0.10)_65%,transparent_75%)]" />
-
-        {/* The 3D Canvas running seamlessly in the background */}
-        <div ref={mountRef} className="w-full h-full cursor-grab active:cursor-grabbing relative z-10" />
-      </div>
+    <div className={`relative w-full h-full select-none overflow-visible pointer-events-none ${className}`}>
+      {/* 100% Transparent WebGL Canvas running seamlessly in the background */}
+      <div ref={mountRef} className="w-full h-full relative z-0 pointer-events-none" />
     </div>
   );
 };
