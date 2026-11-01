@@ -161,54 +161,66 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
     // 5. Create 3D Magnifying Glass
     const glassGroup = new THREE.Group();
 
-    // Metallic deep-blue rim
-    const rimGeom = new THREE.TorusGeometry(1.22, 0.16, 24, 64);
-    const rimMat = new THREE.MeshStandardMaterial({
-      color: 0x0f2a7a,
-      roughness: 0.18,
-      metalness: 0.75,
+    // Vibrant Royal Blue metallic material for rim and handle
+    const glassBlueMat = new THREE.MeshStandardMaterial({
+      color: 0x1346d9,
+      roughness: 0.12,
+      metalness: 0.82,
     });
-    const rimMesh = new THREE.Mesh(rimGeom, rimMat);
+
+    // Metallic deep-blue rim (Torus)
+    const rimGeom = new THREE.TorusGeometry(1.35, 0.19, 32, 72);
+    const rimMesh = new THREE.Mesh(rimGeom, glassBlueMat);
     rimMesh.castShadow = true;
     glassGroup.add(rimMesh);
 
-    // Convex glass lens
-    const lensGeom = new THREE.CylinderGeometry(1.18, 1.18, 0.04, 48);
+    // Convex glass lens with high transmission and realistic refraction
+    const lensGeom = new THREE.CylinderGeometry(1.31, 1.31, 0.04, 48);
     const lensMat = new THREE.MeshPhysicalMaterial({
       color: 0xffffff,
-      transmission: 0.85,
-      roughness: 0.08,
-      ior: 1.45,
+      transmission: 0.92,
+      roughness: 0.05,
+      ior: 1.5,
       transparent: true,
-      opacity: 0.45,
+      opacity: 0.40,
+      reflectivity: 0.85,
     });
     const lensMesh = new THREE.Mesh(lensGeom, lensMat);
     lensMesh.rotation.x = Math.PI / 2;
     glassGroup.add(lensMesh);
 
-    // Handle
-    const handleGeom = new THREE.CylinderGeometry(0.14, 0.14, 1.6, 24);
-    const handleMat = new THREE.MeshStandardMaterial({
-      color: 0x0f2a7a,
-      roughness: 0.2,
-      metalness: 0.7,
+    // Chrome/Silver connector collar at rim junction
+    const neckGeom = new THREE.CylinderGeometry(0.18, 0.18, 0.22, 24);
+    const neckMat = new THREE.MeshStandardMaterial({
+      color: 0xd1d5db,
+      roughness: 0.15,
+      metalness: 0.85,
     });
-    const handleMesh = new THREE.Mesh(handleGeom, handleMat);
-    handleMesh.position.set(-1.45, -1.45, 0);
-    handleMesh.rotation.z = Math.PI / 4; // 45 degree tilt
+    const neckMesh = new THREE.Mesh(neckGeom, neckMat);
+    neckMesh.position.set(-1.08, -1.08, 0);
+    neckMesh.rotation.z = Math.PI / 4;
+    neckMesh.castShadow = true;
+    glassGroup.add(neckMesh);
+
+    // Sleek ergonomic handle extending at 45 degrees
+    const handleGeom = new THREE.CylinderGeometry(0.16, 0.14, 1.6, 24);
+    const handleMesh = new THREE.Mesh(handleGeom, glassBlueMat);
+    handleMesh.position.set(-1.62, -1.62, 0);
+    handleMesh.rotation.z = Math.PI / 4;
     handleMesh.castShadow = true;
     glassGroup.add(handleMesh);
 
-    // Handle tip cap
-    const capGeom = new THREE.SphereGeometry(0.15, 16, 16);
-    const capMesh = new THREE.Mesh(capGeom, handleMat);
-    capMesh.position.set(-2.02, -2.02, 0);
+    // Handle tip rounded cap
+    const capGeom = new THREE.SphereGeometry(0.15, 20, 20);
+    const capMesh = new THREE.Mesh(capGeom, glassBlueMat);
+    capMesh.position.set(-2.18, -2.18, 0);
     glassGroup.add(capMesh);
 
-    // Initial position in front of layer stack
-    glassGroup.position.set(1.4, 0.8, 2.2);
-    glassGroup.rotation.y = -Math.PI / 10;
-    glassGroup.rotation.x = Math.PI / 16;
+    // Align magnifying glass directly toward camera view vector
+    glassGroup.position.set(1.2, 0.65, 2.2);
+    glassGroup.rotation.order = "YXZ";
+    glassGroup.rotation.y = 0.68;
+    glassGroup.rotation.x = -0.32;
     scene.add(glassGroup);
 
     // 6. Floating Polyhedral Spheres in Background
@@ -242,9 +254,9 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
     let animationFrameId: number;
     let clock = new THREE.Clock();
 
-    // Magnifying glass target coordinates
-    // Base layer: y ~ -0.2, Top layer: y ~ 1.3
-    const layerTargetY = [-0.15, 0.35, 0.85, 1.35];
+    // Magnifying glass target coordinates framing the 4 layers
+    // Base layer (0): y ~ 0.35, Handling (1): y ~ 0.60, Service (2): y ~ 0.88, Protection (3): y ~ 1.20
+    const layerTargetY = [0.35, 0.60, 0.88, 1.20];
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
@@ -263,18 +275,18 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
       // Dynamic Magnifying Glass Motion
       if (auditStateRef.current) {
         // Active Audit scanning motion: sweeping smoothly up and down across the layers!
-        const scanCycle = (Math.sin(elapsedTime * 3.5) + 1) / 2; // 0 to 1
-        const targetY = -0.2 + scanCycle * 1.6;
+        const scanCycle = (Math.sin(elapsedTime * 3.2) + 1) / 2; // 0 to 1
+        const targetY = 0.25 + scanCycle * 1.05;
         glassGroup.position.y += (targetY - glassGroup.position.y) * 0.15;
-        glassGroup.position.x = 1.35 + Math.cos(elapsedTime * 2.5) * 0.2;
-        glassGroup.position.z = 2.1 + Math.sin(elapsedTime * 2.0) * 0.15;
-        glassGroup.rotation.z = Math.sin(elapsedTime * 3.0) * 0.08;
+        glassGroup.position.x = 1.25 + Math.cos(elapsedTime * 2.2) * 0.15;
+        glassGroup.position.z = 2.15 + Math.sin(elapsedTime * 1.8) * 0.12;
+        glassGroup.rotation.z = Math.sin(elapsedTime * 2.8) * 0.06;
 
         // Animate slabs reacting to the scan
         slabMeshes.forEach((slab, idx) => {
-          const dist = Math.abs(glassGroup.position.y - basePositionsY[idx]);
-          if (dist < 0.45) {
-            slab.scale.set(1.04, 1.04, 1.04);
+          const dist = Math.abs(glassGroup.position.y - (basePositionsY[idx] + 0.6));
+          if (dist < 0.4) {
+            slab.scale.lerp(new THREE.Vector3(1.04, 1.04, 1.04), 0.15);
           } else {
             slab.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1);
           }
@@ -282,13 +294,14 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
       } else {
         // Idle / Layer-focused state
         const targetIdx = Math.max(0, Math.min(3, activeLayerRef.current));
-        const targetY = layerTargetY[targetIdx] + Math.sin(elapsedTime * 1.8) * 0.05;
-        const targetX = 1.45 + Math.cos(elapsedTime * 1.2) * 0.08;
+        const hoverOffset = Math.sin(elapsedTime * 1.6) * 0.04;
+        const targetY = layerTargetY[targetIdx] + hoverOffset;
+        const targetX = 1.28 + Math.cos(elapsedTime * 1.1) * 0.04;
 
         glassGroup.position.y += (targetY - glassGroup.position.y) * 0.08;
         glassGroup.position.x += (targetX - glassGroup.position.x) * 0.08;
         glassGroup.position.z += (2.2 - glassGroup.position.z) * 0.08;
-        glassGroup.rotation.z = Math.sin(elapsedTime * 1.5) * 0.03;
+        glassGroup.rotation.z = Math.sin(elapsedTime * 1.4) * 0.02;
 
         // Highlight active layer slightly
         slabMeshes.forEach((slab, idx) => {
@@ -390,3 +403,4 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
   );
 };
 export default ThreeDPriceStack;
+

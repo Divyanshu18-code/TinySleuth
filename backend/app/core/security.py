@@ -130,6 +130,10 @@ def clean_tracking_url(raw_url: str) -> str:
             asin = asin_match.group(1).upper()
             return f"{parsed.scheme}://{parsed.netloc}/dp/{asin}"
 
+    # Amazon Shortlinks (amzn.in, amzn.to)
+    if "amzn.in" in hostname or "amzn.to" in hostname:
+        return f"{parsed.scheme}://{parsed.netloc}{parsed.path}"
+
     # Flipkart URL canonicalization: keep path and pid
     if "flipkart.com" in hostname:
         pid_match = re.search(r"[?&]pid=([A-Z0-9]+)", parsed.query, re.IGNORECASE)
@@ -169,8 +173,16 @@ def extract_title_from_url_slug(raw_url: str) -> Optional[str]:
             if len(title) > 3:
                 return title
 
+        # Match Amazon short links amzn.in/d/<token>
+        hostname = (parsed.hostname or "").lower()
+        if "amzn.in" in hostname or "amzn.to" in hostname:
+            token_match = re.search(r"/d/([A-Za-z0-9]+)", parsed.path)
+            if token_match:
+                return f"Amazon India Shared Item (Ref: {token_match.group(1)})"
+            return "Amazon India Shared Product"
+
         # Fallback Amazon ASIN if no slug
-        if "amazon." in (parsed.hostname or "").lower():
+        if "amazon." in hostname:
             asin_match = re.search(r"/(?:dp|gp/product)/([A-Z0-9]{10})", parsed.path, re.IGNORECASE)
             if asin_match:
                 return f"Amazon Item (ASIN: {asin_match.group(1).upper()})"
@@ -195,7 +207,10 @@ def extract_title_from_url_slug(raw_url: str) -> Optional[str]:
 
 LOGIN_WALLED_MERCHANTS: dict[str, str] = {
     "amazon.": "Amazon mandates account login (password and OTP) before checkout totals and delivery fees are revealed.",
+    "amzn.in": "Amazon India mandates account login (password and OTP) before checkout totals and delivery fees are revealed.",
+    "amzn.to": "Amazon mandates account login (password and OTP) before checkout totals and delivery fees are revealed.",
     "flipkart.": "Flipkart requires user sign-in with phone number / OTP before proceeding to checkout.",
+    "fkrt.it": "Flipkart requires user sign-in with phone number / OTP before proceeding to checkout.",
     "myntra.": "Myntra strictly requires mobile OTP login before viewing bag checkout details.",
     "ajio.": "Ajio requires account login before accessing checkout and delivery charges.",
     "nykaa.": "Nykaa requires user authentication before checkout total breakdown.",
@@ -214,6 +229,11 @@ def detect_login_walled_merchant(raw_url: str) -> tuple[bool, Optional[str], Opt
     try:
         parsed = urlparse(raw_url)
         hostname = (parsed.hostname or "").lower()
+        if any(k in hostname for k in ("amazon.", "amzn.in", "amzn.to")):
+            merchant_name = "Amazon India" if (".in" in hostname or "amzn.in" in hostname) else "Amazon"
+            return True, merchant_name, LOGIN_WALLED_MERCHANTS.get("amzn.in" if "amzn.in" in hostname else "amazon.")
+        if any(k in hostname for k in ("flipkart.", "fkrt.it")):
+            return True, "Flipkart", LOGIN_WALLED_MERCHANTS.get("flipkart.")
         for key, explanation in LOGIN_WALLED_MERCHANTS.items():
             if key in hostname:
                 merchant_name = key.rstrip(".").capitalize()

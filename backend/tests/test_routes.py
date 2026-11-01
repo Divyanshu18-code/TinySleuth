@@ -106,3 +106,18 @@ def test_audit_instant_evaluation_for_amazon():
     assert data["raw_diagnostics"]["evaluation_mode"] == "instant_intelligence"
     assert "Amazon" in data["findings"][0]["title"] or "Sign-In" in data["findings"][0]["title"]
 
+
+def test_audit_instant_evaluation_for_amzn_in_shortlink():
+    resp = client.post(
+        "/api/audit",
+        json={"url": "https://amzn.in/d/06C8DI55"},
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "inconclusive"
+    assert "Amazon India" in data["product_title"]
+    assert data["currency"] == "₹"
+    assert data["raw_diagnostics"]["login_walled"] is True
+    assert data["raw_diagnostics"]["evaluation_mode"] == "instant_intelligence"
+    assert "Amazon" in data["raw_diagnostics"]["merchant"]
+
