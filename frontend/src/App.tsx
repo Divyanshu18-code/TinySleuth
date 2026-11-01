@@ -18,7 +18,6 @@ import {
   ExternalLink,
   ChevronDown,
   ArrowRight,
-  Menu as MenuIcon,
 } from "lucide-react";
 import { startAudit, type AuditResponse } from "./api";
 import ThreeDPriceStack from "./components/ThreeDPriceStack";
@@ -429,30 +428,44 @@ export default function App() {
 
       {/* 1. Header Navigation — Frosted Capsule Pills (Exact match to reference video) */}
       <header className="relative z-50 pt-5 sm:pt-7 px-4 sm:px-8 max-w-7xl mx-auto flex items-center justify-between">
-        {/* Left Capsule Pills Group */}
-        <div className="flex items-center gap-3">
-          {/* Brand Capsule Pill */}
-          <div
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="dark-glass-pill px-4 sm:px-5 py-2.5 flex items-center gap-2.5 cursor-pointer hover:border-white/30 transition shadow-lg"
-          >
-            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500/20 text-blue-400">
-              <Search className="h-3 w-3" />
-            </div>
-            <span className="text-sm font-bold text-white tracking-tight">TinySleuth</span>
+        {/* Brand Capsule Pill */}
+        <div
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className="dark-glass-pill px-4 sm:px-5 py-2.5 flex items-center gap-2.5 cursor-pointer hover:border-white/30 transition shadow-lg"
+        >
+          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500/20 text-blue-400">
+            <Search className="h-3 w-3" />
           </div>
-
-          {/* Menu Capsule Pill */}
-          <a
-            href="#features"
-            className="dark-glass-pill hidden sm:flex px-4 py-2.5 items-center gap-2 text-slate-300 text-xs font-medium hover:text-white transition shadow-lg"
-          >
-            <span>Menu</span>
-            <MenuIcon className="h-3.5 w-3.5 text-slate-400" />
-          </a>
+          <span className="text-sm font-bold text-white tracking-tight">TinySleuth</span>
         </div>
 
-        {/* Right CTA Capsule Pill */}
+        {/* Navigation Links (Matches user's exact specification: Home, Why us, How it works) */}
+        <nav className="flex items-center gap-6 sm:gap-10 text-xs sm:text-sm font-medium">
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="text-white hover:text-blue-400 transition cursor-pointer"
+          >
+            Home
+          </a>
+          <a
+            href="#fair-by-design"
+            className="text-slate-300 hover:text-white transition cursor-pointer"
+          >
+            Why us
+          </a>
+          <a
+            href="#features"
+            className="text-slate-300 hover:text-white transition cursor-pointer"
+          >
+            How it works
+          </a>
+        </nav>
+
+        {/* Right CTA Capsule Pill (Get Started ↗) */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => {
@@ -461,7 +474,7 @@ export default function App() {
             }}
             className="dark-glass-pill px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-medium text-slate-200 hover:text-white flex items-center gap-1.5 shadow-lg group"
           >
-            <span>Start Audit</span>
+            <span>Get Started</span>
             <span className="text-slate-400 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition">
               ↗
             </span>
@@ -614,7 +627,7 @@ export default function App() {
 
           {/* Right Column: Rotating 3D Glass Sculpture matching Reference Video */}
           <div className="lg:col-span-5 relative flex items-center justify-center">
-            <div className="w-full relative">
+            <div className="w-full relative h-[480px] sm:h-[580px] lg:h-[660px]">
               <ThreeDPriceStack isAuditing={loading} />
             </div>
           </div>
