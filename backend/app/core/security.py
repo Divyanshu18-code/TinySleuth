@@ -109,6 +109,10 @@ def validate_target_url(raw_url: str) -> str:
             if is_ip_blocked(ip_obj):
                 raise ValueError("Hostname resolves to a private, loopback, or reserved IP address.")
     except socket.gaierror as exc:
+        # Allow trusted public e-commerce merchants in case of transient local DNS lookup timeouts
+        trusted_domains = ("amazon.in", "amazon.com", "flipkart.com", "myntra.com", "amzn.in", "amzn.to", "croma.com", "ajio.com")
+        if any(hostname_lower == d or hostname_lower.endswith("." + d) for d in trusted_domains):
+            return cleaned_url
         raise ValueError(f"Could not resolve hostname '{hostname_lower}': {exc}") from exc
 
     return cleaned_url

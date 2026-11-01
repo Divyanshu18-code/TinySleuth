@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { startAudit, type AuditResponse } from "./api";
 import ThreeDPriceStack from "./components/ThreeDPriceStack";
+import ColorBends from "./components/ColorBends";
 
 // Verified demo datasets for hackathon presentation and offline evaluation
 const DEMO_SCENARIOS: Array<{
@@ -407,6 +408,25 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#06060c] text-white font-sans antialiased selection:bg-blue-600 selection:text-white relative overflow-x-hidden">
+      {/* Dynamic React Bits ColorBends Wave Flow in Background */}
+      <div className="fixed inset-0 pointer-events-none z-0 opacity-40">
+        <ColorBends
+          colors={["#2563eb", "#7c3aed", "#00ffd1", "#f59e0b"]}
+          rotation={90}
+          speed={0.18}
+          scale={1.1}
+          frequency={1}
+          warpStrength={1}
+          mouseInfluence={0.8}
+          parallax={0.4}
+          noise={0.12}
+          iterations={2}
+          intensity={1.4}
+          bandWidth={6}
+          transparent
+        />
+      </div>
+
       {/* Cinematic Ambient Background Lighting Glows */}
       <div className="fixed inset-0 pointer-events-none z-0">
         {/* Deep Plum & Violet Radial Bloom (Top-Left) */}
