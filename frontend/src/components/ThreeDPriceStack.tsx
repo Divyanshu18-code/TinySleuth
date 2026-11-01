@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { motion, useReducedMotion } from "motion/react";
-import { Info } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 interface ThreeDPriceStackProps {
   isAuditing?: boolean;
@@ -15,7 +15,7 @@ export const LAYER_DATA = [
     id: "base",
     title: "Product Price",
     amount: "₹999",
-    color: "#2563EB",
+    color: "#3B82F6",
     type: "base",
     description: "Advertised base listing rate",
   },
@@ -23,7 +23,7 @@ export const LAYER_DATA = [
     id: "handling",
     title: "Handling Fee",
     amount: "+₹29",
-    color: "#6D28D9",
+    color: "#6366F1",
     type: "mandatory",
     description: "Mandatory checkout processing",
   },
@@ -31,7 +31,7 @@ export const LAYER_DATA = [
     id: "service",
     title: "Service Fee",
     amount: "+₹49",
-    color: "#7C3AED",
+    color: "#8B5CF6",
     type: "mandatory",
     description: "Platform packaging charge",
   },
@@ -56,6 +56,7 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
   const auditStateRef = useRef(isAuditing);
   const activeLayerRef = useRef(activeLayer);
   const prefersReducedMotion = useReducedMotion();
+  const mouseTargetRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     auditStateRef.current = isAuditing;
@@ -69,292 +70,217 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
     const container = mountRef.current;
     if (!container) return;
 
-    const width = container.clientWidth || 500;
-    const height = container.clientHeight || 420;
+    const width = container.clientWidth || 540;
+    const height = container.clientHeight || 480;
 
-    // 1. Scene & Camera Setup (Centered & Balanced Composition)
+    // 1. Scene & Perspective Camera Setup
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(35, width / height, 0.1, 100);
-    camera.position.set(5.2, 3.4, 6.8);
-    camera.lookAt(0.1, 0.1, 0);
+    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
+    camera.position.set(0, 0, 7.8);
+    camera.lookAt(0, 0, 0);
 
-    // 2. High-Performance WebGL Renderer
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    // 2. High-Fidelity WebGL Renderer with Tone Mapping
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.35;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     container.appendChild(renderer.domElement);
 
-    // 3. Lighting (Clean SaaS Lighting: Key, Fill, Rim & Soft Violet Glow)
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.35);
+    // 3. Programmatic Studio Environment Map (Creates Rich Specular Refractions on Glass)
+    const envCanvas = document.createElement("canvas");
+    envCanvas.width = 512;
+    envCanvas.height = 256;
+    const ctx = envCanvas.getContext("2d");
+    if (ctx) {
+      // Dark space gradient
+      const bgGrad = ctx.createLinearGradient(0, 0, 512, 256);
+      bgGrad.addColorStop(0, "#080714");
+      bgGrad.addColorStop(0.5, "#0d0c24");
+      bgGrad.addColorStop(1, "#05050d");
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, 512, 256);
+
+      // Warm copper softbox stripe (Top-Right)
+      const copperGrad = ctx.createRadialGradient(400, 60, 5, 400, 60, 110);
+      copperGrad.addColorStop(0, "rgba(245, 158, 11, 0.95)");
+      copperGrad.addColorStop(0.4, "rgba(217, 119, 6, 0.5)");
+      copperGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = copperGrad;
+      ctx.beginPath();
+      ctx.arc(400, 60, 110, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Electric cyan/blue softbox stripe (Bottom-Left)
+      const blueGrad = ctx.createRadialGradient(100, 200, 5, 100, 200, 130);
+      blueGrad.addColorStop(0, "rgba(59, 130, 246, 0.9)");
+      blueGrad.addColorStop(0.5, "rgba(37, 99, 235, 0.45)");
+      blueGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = blueGrad;
+      ctx.beginPath();
+      ctx.arc(100, 200, 130, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Neon lime highlight (Center-Right)
+      const greenGrad = ctx.createRadialGradient(320, 140, 5, 320, 140, 90);
+      greenGrad.addColorStop(0, "rgba(16, 185, 129, 0.85)");
+      greenGrad.addColorStop(0.6, "rgba(5, 150, 105, 0.3)");
+      greenGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = greenGrad;
+      ctx.beginPath();
+      ctx.arc(320, 140, 90, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    const envTexture = new THREE.CanvasTexture(envCanvas);
+    envTexture.mapping = THREE.EquirectangularReflectionMapping;
+    scene.environment = envTexture;
+
+    // 4. Studio Lighting Rig (Molten Copper Rim + Electric Blue Fill + Neon Green Core Glow)
+    const ambientLight = new THREE.AmbientLight(0x0f0f1f, 1.8);
     scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1.85);
-    dirLight.position.set(5.5, 8.5, 7.0);
-    dirLight.castShadow = true;
-    dirLight.shadow.mapSize.width = 1024;
-    dirLight.shadow.mapSize.height = 1024;
-    dirLight.shadow.camera.near = 0.5;
-    dirLight.shadow.camera.far = 25;
-    dirLight.shadow.bias = -0.0004;
-    scene.add(dirLight);
+    // Top-Right: Molten Copper / Amber Rim Light (Creates the video's fiery upper edge)
+    const copperRimLight = new THREE.DirectionalLight(0xf59e0b, 5.2);
+    copperRimLight.position.set(5.5, 6.0, 3.5);
+    scene.add(copperRimLight);
 
-    // Soft cool-violet fill light
-    const fillLight = new THREE.PointLight(0xa5b4fc, 1.25, 20);
-    fillLight.position.set(-5, 4, 3);
-    scene.add(fillLight);
+    // Bottom-Left: Electric Royal Blue Fill Light
+    const blueFillLight = new THREE.PointLight(0x2563eb, 4.8, 18);
+    blueFillLight.position.set(-5.0, -4.0, 3.0);
+    scene.add(blueFillLight);
 
-    // Soft blue-violet backlight glow (used sparingly behind the main object)
-    const backGlowLight = new THREE.PointLight(0x7c3aed, 1.4, 12);
-    backGlowLight.position.set(0, 0.4, -1.8);
-    scene.add(backGlowLight);
+    // Center Core: Neon Green / Lime Glow (Shines through interior of knot)
+    const neonGreenLight = new THREE.PointLight(0x10b981, 4.2, 12);
+    neonGreenLight.position.set(0.3, 0.2, 0.5);
+    scene.add(neonGreenLight);
 
-    // Warm subtle rim accent
-    const accentLight = new THREE.PointLight(0xfef3c7, 0.9, 15);
-    accentLight.position.set(3.5, 5, 4);
-    scene.add(accentLight);
+    // Deep Plum / Violet Backlight (Adds cinematic atmosphere)
+    const plumBackLight = new THREE.PointLight(0x7c3aed, 3.8, 16);
+    plumBackLight.position.set(0, 2.5, -4.5);
+    scene.add(plumBackLight);
 
-    // Helper: Rounded Rectangle Shape for Box Extrusions
-    function createRoundedRectShape(w: number, h: number, r: number): THREE.Shape {
-      const shape = new THREE.Shape();
-      const x = -w / 2;
-      const y = -h / 2;
-      shape.moveTo(x + r, y);
-      shape.lineTo(x + w - r, y);
-      shape.quadraticCurveTo(x + w, y, x + w, y + r);
-      shape.lineTo(x + w, y + h - r);
-      shape.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-      shape.lineTo(x + r, y + h);
-      shape.quadraticCurveTo(x, y + h, x, y + h - r);
-      shape.lineTo(x, y + r);
-      shape.quadraticCurveTo(x, y, x + r, y);
-      return shape;
-    }
+    // 5. 3D Master Sculpture Group (Torus Knot Organic Loop)
+    const masterGroup = new THREE.Group();
+    scene.add(masterGroup);
 
-    // 4. Ground Contact Shadow (Soft Radial Disc Grounding the Product Box)
-    const shadowGeom = new THREE.PlaneGeometry(4.4, 3.2);
-    const shadowMat = new THREE.MeshBasicMaterial({
-      color: 0x0f172a,
+    // --- OUTER SHELL: Smoked Obsidian Glass Torus Knot ---
+    // Matches the organic flowing mobius loop seen in the video
+    const outerKnotGeom = new THREE.TorusKnotGeometry(2.1, 0.62, 220, 54, 2, 3);
+    const outerGlassMat = new THREE.MeshPhysicalMaterial({
+      color: 0x080913,
+      emissive: 0x030308,
+      roughness: 0.04,
+      metalness: 0.12,
+      transmission: 0.91, // Smoked glass transmission
+      ior: 1.58, // High refractive index
+      thickness: 1.9,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.03,
+      specularIntensity: 1.5,
+      specularColor: new THREE.Color(0xffffff),
       transparent: true,
-      opacity: 0.08,
+      opacity: 0.96,
       depthWrite: false,
     });
-    const shadowMesh = new THREE.Mesh(shadowGeom, shadowMat);
-    shadowMesh.rotation.x = -Math.PI / 2;
-    shadowMesh.position.set(0, -0.96, 0);
-    scene.add(shadowMesh);
+    const outerGlassMesh = new THREE.Mesh(outerKnotGeom, outerGlassMat);
+    masterGroup.add(outerGlassMesh);
 
-    // 5. Premium 3D Product Box (Stratified Checkout Tiers)
-    const packageGroup = new THREE.Group();
-    packageGroup.position.set(0, -0.4, 0);
-    packageGroup.rotation.y = -Math.PI / 8; // Classic isometric angle
-    scene.add(packageGroup);
-
-    const slabShape = createRoundedRectShape(3.4, 2.3, 0.26);
-    const extrudeSettings: THREE.ExtrudeGeometryOptions = {
-      depth: 0.32,
-      bevelEnabled: true,
-      bevelSegments: 5,
-      steps: 1,
-      bevelSize: 0.07,
-      bevelThickness: 0.07,
-    };
-    const slabGeometry = new THREE.ExtrudeGeometry(slabShape, extrudeSettings);
-    slabGeometry.rotateX(-Math.PI / 2); // Lay horizontal
-
-    // Slabs: Royal Blue, Deep Violet, Bright Violet, Honey Amber (Translucent)
-    const slabColors = [0x1d4ed8, 0x5b21b6, 0x7c3aed, 0xd97706];
-    const slabMeshes: THREE.Mesh[] = [];
-    const basePositionsY = [-0.65, -0.18, 0.30, 0.78];
-
-    for (let i = 0; i < 4; i++) {
-      const isTopLid = i === 3;
-      const material = new THREE.MeshStandardMaterial({
-        color: slabColors[i],
-        roughness: isTopLid ? 0.18 : 0.24,
-        metalness: isTopLid ? 0.08 : 0.20,
-        transparent: isTopLid,
-        opacity: isTopLid ? 0.88 : 1.0,
-      });
-
-      const mesh = new THREE.Mesh(slabGeometry, material);
-      mesh.position.set(0, basePositionsY[i], 0);
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
-      packageGroup.add(mesh);
-      slabMeshes.push(mesh);
-    }
-
-    // Top Lid Verification Seal Tape (Represents Online Checkout Verification)
-    const sealTapeShape = createRoundedRectShape(0.42, 2.34, 0.05);
-    const sealTapeGeom = new THREE.ExtrudeGeometry(sealTapeShape, {
-      depth: 0.03,
-      bevelEnabled: true,
-      bevelSegments: 3,
-      bevelSize: 0.015,
-      bevelThickness: 0.015,
-    });
-    sealTapeGeom.rotateX(-Math.PI / 2);
-    const sealTapeMat = new THREE.MeshStandardMaterial({
-      color: 0x2563eb,
-      metalness: 0.65,
-      roughness: 0.25,
-    });
-    const sealTapeMesh = new THREE.Mesh(sealTapeGeom, sealTapeMat);
-    sealTapeMesh.position.set(0, basePositionsY[3] + 0.34, 0);
-    packageGroup.add(sealTapeMesh);
-
-    // Central Brushed Audit Crest
-    const crestGeom = new THREE.CylinderGeometry(0.24, 0.24, 0.04, 32);
-    const crestMat = new THREE.MeshStandardMaterial({
-      color: 0xe2e8f0,
-      metalness: 0.90,
+    // --- INNER LUMINOUS CORE 1: Neon Emerald / Lime Channel ---
+    // Looping through the hollow interior of the knot
+    const innerKnotGeom1 = new THREE.TorusKnotGeometry(2.08, 0.24, 180, 28, 2, 3);
+    const innerNeonMat1 = new THREE.MeshStandardMaterial({
+      color: 0x10b981,
+      emissive: 0x10b981,
+      emissiveIntensity: 3.2,
       roughness: 0.15,
+      metalness: 0.85,
     });
-    const crestMesh = new THREE.Mesh(crestGeom, crestMat);
-    crestMesh.position.set(0, basePositionsY[3] + 0.38, 0);
-    crestMesh.castShadow = true;
-    packageGroup.add(crestMesh);
+    const innerNeonMesh1 = new THREE.Mesh(innerKnotGeom1, innerNeonMat1);
+    masterGroup.add(innerNeonMesh1);
 
-    // 6. Beautiful 3D Magnifying Glass (Checkout Truth Inspector)
-    const glassGroup = new THREE.Group();
-
-    // Metallic Royal Blue Rim Material
-    const glassBlueMat = new THREE.MeshStandardMaterial({
-      color: 0x1d4ed8,
-      roughness: 0.14,
-      metalness: 0.82,
+    // --- INNER LUMINOUS CORE 2: Electric Cyan / Royal Blue Accent Filament ---
+    const innerKnotGeom2 = new THREE.TorusKnotGeometry(2.11, 0.14, 160, 24, 2, 3);
+    const innerNeonMat2 = new THREE.MeshStandardMaterial({
+      color: 0x00d4ff,
+      emissive: 0x0088ff,
+      emissiveIntensity: 2.8,
+      roughness: 0.2,
+      metalness: 0.9,
     });
+    const innerNeonMesh2 = new THREE.Mesh(innerKnotGeom2, innerNeonMat2);
+    innerNeonMesh2.rotation.y = 0.15;
+    innerNeonMesh2.rotation.z = 0.1;
+    masterGroup.add(innerNeonMesh2);
 
-    // Sleek Torus Rim
-    const rimGeom = new THREE.TorusGeometry(1.08, 0.11, 32, 64);
-    const rimMesh = new THREE.Mesh(rimGeom, glassBlueMat);
-    rimMesh.castShadow = true;
-    glassGroup.add(rimMesh);
-
-    // Crystal-Clear Refractive Glass Lens
-    const lensGeom = new THREE.CylinderGeometry(1.05, 1.05, 0.02, 48);
-    const lensMat = new THREE.MeshPhysicalMaterial({
-      color: 0xffffff,
-      transmission: 0.95,
-      roughness: 0.03,
-      ior: 1.48,
+    // --- OUTER SPECULAR ORBITAL RING (Subtle Truth Inspection Halo) ---
+    const haloGeom = new THREE.TorusGeometry(3.1, 0.02, 16, 100);
+    const haloMat = new THREE.MeshBasicMaterial({
+      color: 0x38bdf8,
       transparent: true,
-      opacity: 0.24,
-      reflectivity: 0.85,
+      opacity: 0.45,
     });
-    const lensMesh = new THREE.Mesh(lensGeom, lensMat);
-    lensMesh.rotation.x = Math.PI / 2;
-    glassGroup.add(lensMesh);
+    const haloMesh = new THREE.Mesh(haloGeom, haloMat);
+    haloMesh.rotation.x = Math.PI / 2.3;
+    masterGroup.add(haloMesh);
 
-    // Fine Inspection Reticle Ring inside Lens (Truth Auditor Signifier)
-    const reticleGeom = new THREE.TorusGeometry(0.52, 0.012, 16, 48);
-    const reticleMat = new THREE.MeshBasicMaterial({
-      color: 0x60a5fa,
-      transparent: true,
-      opacity: 0.55,
-    });
-    const reticleMesh = new THREE.Mesh(reticleGeom, reticleMat);
-    glassGroup.add(reticleMesh);
+    // 6. Interactive Parallax Mouse Listener
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = container.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
+      mouseTargetRef.current = { x: Math.max(-1, Math.min(1, x)), y: Math.max(-1, Math.min(1, y)) };
+    };
 
-    // Polished Chrome Junction Ring
-    const collarGeom = new THREE.CylinderGeometry(0.13, 0.13, 0.14, 24);
-    const collarMat = new THREE.MeshStandardMaterial({
-      color: 0xd1d5db,
-      metalness: 0.90,
-      roughness: 0.12,
-    });
-    const collarMesh = new THREE.Mesh(collarGeom, collarMat);
-    collarMesh.position.set(-0.80, -0.80, 0);
-    collarMesh.rotation.z = Math.PI / 4;
-    glassGroup.add(collarMesh);
+    container.addEventListener("mousemove", handleMouseMove);
 
-    // Slender Ergonomic Royal Blue Handle (Proportioned so it never clips or gets covered)
-    const handleGeom = new THREE.CylinderGeometry(0.12, 0.10, 1.25, 24);
-    const handleMesh = new THREE.Mesh(handleGeom, glassBlueMat);
-    handleMesh.position.set(-1.20, -1.20, 0);
-    handleMesh.rotation.z = Math.PI / 4;
-    handleMesh.castShadow = true;
-    glassGroup.add(handleMesh);
-
-    // Polished Rounded Tip Cap
-    const capGeom = new THREE.SphereGeometry(0.11, 20, 20);
-    const capMesh = new THREE.Mesh(capGeom, glassBlueMat);
-    capMesh.position.set(-1.64, -1.64, 0);
-    glassGroup.add(capMesh);
-
-    // Positioning: Hovering cleanly over the upper-right of the product box
-    // Leaves generous whitespace on the bottom-left so the search icon handle is 100% visible
-    glassGroup.position.set(1.50, 1.05, 1.80);
-    glassGroup.rotation.order = "YXZ";
-    glassGroup.rotation.y = 0.65;
-    glassGroup.rotation.x = -0.32;
-    scene.add(glassGroup);
-
-    // 7. Lightweight Animation Loop (Gentle Motion & Reduced-Motion Aware)
+    // 7. Render Animation Loop (Continuous Fluid Rotation + Dynamic Pulse)
     let animationFrameId: number;
-    let clock = new THREE.Clock();
+    const clock = new THREE.Clock();
     const isReduced = prefersReducedMotion || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let currentTiltX = 0;
+    let currentTiltY = 0;
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
+
       if (isReduced) {
         renderer.render(scene, camera);
         return;
       }
 
-      const elapsedTime = clock.getElapsedTime();
+      const elapsed = clock.getElapsedTime();
+      const isScanning = auditStateRef.current;
 
-      // Gentle floating motion for the main product box
-      packageGroup.position.y = -0.4 + Math.sin(elapsedTime * 1.2) * 0.035;
-      packageGroup.rotation.y = -Math.PI / 8 + Math.sin(elapsedTime * 0.7) * 0.02;
+      // Mouse Parallax Smooth Lerp
+      currentTiltX += (mouseTargetRef.current.x * 0.45 - currentTiltX) * 0.06;
+      currentTiltY += (mouseTargetRef.current.y * 0.35 - currentTiltY) * 0.06;
 
-      // Subtle magnifying-glass inspection animation
-      if (auditStateRef.current) {
-        // Active scanning mode during audit execution
-        const scanCycle = (Math.sin(elapsedTime * 3.2) + 1) / 2; // 0 to 1
-        const targetY = 0.50 + scanCycle * 0.85;
-        glassGroup.position.y += (targetY - glassGroup.position.y) * 0.15;
-        glassGroup.position.x = 1.45 + Math.cos(elapsedTime * 2.2) * 0.12;
-        glassGroup.position.z = 1.85 + Math.sin(elapsedTime * 1.8) * 0.08;
-        glassGroup.rotation.z = Math.sin(elapsedTime * 2.8) * 0.05;
+      // Organic Dual-Axis Continuous Rotation
+      const rotSpeed = isScanning ? 0.022 : 0.0075;
+      masterGroup.rotation.y += rotSpeed;
+      masterGroup.rotation.z += rotSpeed * 0.55;
+      masterGroup.rotation.x = Math.sin(elapsed * 0.6) * 0.15 + currentTiltY;
+      masterGroup.position.x = currentTiltX * 0.3;
+      masterGroup.position.y = Math.sin(elapsed * 1.1) * 0.08 - currentTiltY * 0.2;
 
-        // Subtle layer pulse reaction under scan
-        slabMeshes.forEach((slab, idx) => {
-          const dist = Math.abs(glassGroup.position.y - (basePositionsY[idx] + 0.4));
-          if (dist < 0.35) {
-            slab.scale.lerp(new THREE.Vector3(1.03, 1.03, 1.03), 0.15);
-          } else {
-            slab.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1);
-          }
-        });
-      } else {
-        // Smooth idle inspection hover framing the upper-right of the product box
-        // Leaves the entire bottom-left search handle completely unobstructed and in plain view
-        const hoverOffsetY = Math.sin(elapsedTime * 1.5) * 0.04;
-        const hoverOffsetX = Math.cos(elapsedTime * 1.1) * 0.03;
-        const targetY = 1.05 + hoverOffsetY;
-        const targetX = 1.50 + hoverOffsetX;
-
-        glassGroup.position.y += (targetY - glassGroup.position.y) * 0.08;
-        glassGroup.position.x += (targetX - glassGroup.position.x) * 0.08;
-        glassGroup.position.z += (1.80 - glassGroup.position.z) * 0.08;
-        glassGroup.rotation.z = Math.sin(elapsedTime * 1.2) * 0.025;
-
-        // Gentle highlight on active layer if selected
-        slabMeshes.forEach((slab, idx) => {
-          const targetScale = idx === activeLayerRef.current ? 1.025 : 1.0;
-          slab.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
-        });
-      }
+      // Breathing Core Glow Effect (Intensifies during active audit)
+      const basePulse = Math.sin(elapsed * (isScanning ? 5.0 : 2.0));
+      const glowMultiplier = isScanning ? 1.4 : 1.0;
+      innerNeonMat1.emissiveIntensity = (3.2 + basePulse * 0.8) * glowMultiplier;
+      innerNeonMat2.emissiveIntensity = (2.8 + Math.cos(elapsed * 2.2) * 0.6) * glowMultiplier;
+      neonGreenLight.intensity = (4.2 + basePulse * 1.2) * glowMultiplier;
+      blueFillLight.intensity = (4.8 + Math.sin(elapsed * 1.8) * 0.8) * glowMultiplier;
+      haloMesh.rotation.z = elapsed * 0.2;
 
       renderer.render(scene, camera);
     };
 
     animate();
 
-    // 8. Responsive Resize Observer
+    // 8. Responsive Resize Handler
     const handleResize = () => {
       if (!container) return;
       const newW = container.clientWidth;
@@ -368,18 +294,18 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
 
     return () => {
       cancelAnimationFrame(animationFrameId);
+      container.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("resize", handleResize);
       renderer.dispose();
-      slabGeometry.dispose();
-      sealTapeGeom.dispose();
-      crestGeom.dispose();
-      rimGeom.dispose();
-      lensGeom.dispose();
-      reticleGeom.dispose();
-      collarGeom.dispose();
-      handleGeom.dispose();
-      capGeom.dispose();
-      shadowGeom.dispose();
+      outerKnotGeom.dispose();
+      outerGlassMat.dispose();
+      innerKnotGeom1.dispose();
+      innerNeonMat1.dispose();
+      innerKnotGeom2.dispose();
+      innerNeonMat2.dispose();
+      haloGeom.dispose();
+      haloMat.dispose();
+      envTexture.dispose();
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
@@ -388,167 +314,156 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
 
   return (
     <div className={`relative w-full select-none ${className}`}>
-      {/* 3D WebGL Canvas Container with Soft Blue-Violet Glow */}
-      <div className="relative w-full h-[320px] sm:h-[440px] flex items-center justify-center">
-        {/* Soft blue-violet backlight glow behind main object */}
-        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_50%_48%,rgba(99,102,241,0.10)_0%,rgba(124,58,237,0.05)_45%,transparent_70%)]" />
+      {/* 3D WebGL Canvas Container with Ambient Glows matching reference video */}
+      <div className="relative w-full h-[360px] sm:h-[480px] lg:h-[520px] flex items-center justify-center">
+        {/* Soft atmospheric gradient glows behind the glass sculpture */}
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_65%_45%,rgba(245,158,11,0.08)_0%,rgba(16,185,129,0.06)_30%,rgba(37,99,235,0.08)_60%,transparent_75%)]" />
 
-        <div ref={mountRef} className="w-full h-full cursor-pointer relative z-10" />
+        {/* The Three.js Canvas */}
+        <div ref={mountRef} className="w-full h-full cursor-grab active:cursor-grabbing relative z-10" />
 
         {/* ======================================================== */}
-        {/* DESKTOP & TABLET FLOATING LABELS (Zero-Overlap 4-Corner Layout) */}
+        {/* DESKTOP & TABLET SLEEK DARK GLASS BADGES (4-Corner Truth Pills) */}
         {/* ======================================================== */}
         <div className="hidden sm:block absolute inset-0 pointer-events-none z-20">
-          {/* Label 4: Protection Plan (Top-Left) */}
+          {/* Label 1: Product Price (Top-Left) — Electric Blue Hero Focus */}
           <motion.div
             initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: -12, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ delay: 0.4, duration: 0.45 }}
-            onClick={() => onLayerSelect && onLayerSelect(3)}
-            className={`pointer-events-auto absolute top-3 left-3 sm:top-5 sm:left-5 rounded-xl border bg-white/95 backdrop-blur-md p-3 shadow-md transition transform cursor-pointer max-w-[210px] ${
-              activeLayer === 3
-                ? "border-amber-400 ring-2 ring-amber-400/30 bg-amber-50/90 shadow-amber-500/10"
-                : "border-amber-200/90 hover:border-amber-300 hover:shadow-lg shadow-amber-500/5 hover:-translate-y-0.5"
-            }`}
-          >
-            <div className="flex items-center justify-between gap-2 mb-1">
-              <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                Protection Plan
-              </span>
-              <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[9px] font-bold text-amber-700 border border-amber-200 uppercase tracking-wider">
-                OPTIONAL
-              </span>
-            </div>
-            <div className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">+₹99</div>
-            <div className="text-[10px] font-medium text-amber-700 mt-0.5 flex items-center gap-1">
-              <span>Pre-ticked add-on</span>
-            </div>
-          </motion.div>
-
-          {/* Label 3: Service Fee (Top-Right) */}
-          <motion.div
-            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: -12, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ delay: 0.3, duration: 0.45 }}
-            onClick={() => onLayerSelect && onLayerSelect(2)}
-            className={`pointer-events-auto absolute top-3 right-3 sm:top-5 sm:right-5 rounded-xl border bg-white/95 backdrop-blur-md p-3 shadow-md transition transform cursor-pointer max-w-[190px] ${
-              activeLayer === 2
-                ? "border-purple-400 ring-2 ring-purple-400/30 bg-purple-50/90 shadow-purple-500/10"
-                : "border-slate-200/90 hover:border-slate-300 hover:shadow-lg shadow-slate-900/5 hover:-translate-y-0.5"
-            }`}
-          >
-            <div className="text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
-              Service Fee
-            </div>
-            <div className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">+₹49</div>
-            <div className="text-[10px] font-medium text-slate-500 mt-0.5">Mandatory checkout fee</div>
-          </motion.div>
-
-          {/* Label 1: Product Price (Bottom-Left) — Sleek, Non-Overlapping Primary Hero Focus */}
-          <motion.div
-            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 12, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ delay: 0.15, duration: 0.4 }}
             onClick={() => onLayerSelect && onLayerSelect(0)}
-            className={`pointer-events-auto absolute bottom-3 left-3 sm:bottom-4 sm:left-4 rounded-xl border-2 border-blue-600 bg-white/95 backdrop-blur-md px-3 py-2 sm:px-3.5 sm:py-2.5 shadow-lg shadow-blue-500/10 ring-4 ring-blue-500/10 transition transform cursor-pointer w-auto max-w-[160px] sm:max-w-[170px] ${
-              activeLayer === 0 ? "ring-blue-600/25 bg-blue-50/40" : "hover:shadow-xl hover:-translate-y-0.5"
+            className={`pointer-events-auto absolute top-4 left-4 rounded-2xl border bg-black/60 backdrop-blur-xl px-4 py-3 shadow-2xl transition transform cursor-pointer max-w-[190px] ${
+              activeLayer === 0
+                ? "border-blue-500 ring-2 ring-blue-500/30 bg-blue-950/40 shadow-blue-500/20"
+                : "border-white/10 hover:border-blue-400/50 hover:bg-black/80 hover:-translate-y-0.5"
             }`}
           >
-            <div className="text-[10px] sm:text-[11px] font-bold text-blue-600 uppercase tracking-wider">
-              Product Price
+            <div className="flex items-center justify-between gap-1.5 mb-1">
+              <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider">Product Price</span>
+              <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
             </div>
-            <div className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none my-1">
-              ₹999
-            </div>
-            <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] font-medium text-emerald-600">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-              <span>Base Sticker Rate</span>
+            <div className="text-xl sm:text-2xl font-black text-white tracking-tight leading-none my-1">₹999</div>
+            <div className="text-[10px] font-medium text-slate-400 mt-1 flex items-center gap-1">
+              <span>Advertised base rate</span>
             </div>
           </motion.div>
 
-          {/* Label 2: Handling Fee (Bottom-Right) */}
+          {/* Label 4: Protection Plan (Top-Right) — Amber Optional */}
+          <motion.div
+            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: -12, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: 0.35, duration: 0.45 }}
+            onClick={() => onLayerSelect && onLayerSelect(3)}
+            className={`pointer-events-auto absolute top-4 right-4 rounded-2xl border bg-black/60 backdrop-blur-xl px-4 py-3 shadow-2xl transition transform cursor-pointer max-w-[200px] ${
+              activeLayer === 3
+                ? "border-amber-400 ring-2 ring-amber-400/30 bg-amber-950/40 shadow-amber-500/20"
+                : "border-white/10 hover:border-amber-400/50 hover:bg-black/80 hover:-translate-y-0.5"
+            }`}
+          >
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Protection Plan</span>
+              <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[9px] font-extrabold text-amber-400 border border-amber-500/40 uppercase tracking-wider">
+                OPTIONAL
+              </span>
+            </div>
+            <div className="text-lg font-bold text-white tracking-tight">+₹99</div>
+            <div className="text-[10px] font-medium text-amber-400/90 mt-0.5">Pre-ticked opt-in add-on</div>
+          </motion.div>
+
+          {/* Label 2: Handling Fee (Bottom-Left) */}
           <motion.div
             initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 15, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ delay: 0.25, duration: 0.45 }}
             onClick={() => onLayerSelect && onLayerSelect(1)}
-            className={`pointer-events-auto absolute bottom-4 right-3 sm:bottom-6 sm:right-5 rounded-xl border bg-white/95 backdrop-blur-md p-3 shadow-md transition transform cursor-pointer max-w-[190px] ${
+            className={`pointer-events-auto absolute bottom-4 left-4 rounded-2xl border bg-black/60 backdrop-blur-xl px-4 py-3 shadow-2xl transition transform cursor-pointer max-w-[190px] ${
               activeLayer === 1
-                ? "border-indigo-400 ring-2 ring-indigo-400/30 bg-indigo-50/90 shadow-indigo-500/10"
-                : "border-slate-200/90 hover:border-slate-300 hover:shadow-lg shadow-slate-900/5 hover:-translate-y-0.5"
+                ? "border-indigo-400 ring-2 ring-indigo-400/30 bg-indigo-950/40 shadow-indigo-500/20"
+                : "border-white/10 hover:border-indigo-400/50 hover:bg-black/80 hover:-translate-y-0.5"
             }`}
           >
-            <div className="text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
-              Handling Fee
-            </div>
-            <div className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">+₹29</div>
-            <div className="text-[10px] font-medium text-slate-500 mt-0.5">Mandatory checkout fee</div>
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Handling Fee</div>
+            <div className="text-lg font-bold text-white tracking-tight">+₹29</div>
+            <div className="text-[10px] font-medium text-slate-400 mt-0.5">Mandatory checkout fee</div>
+          </motion.div>
+
+          {/* Label 3: Service Fee (Bottom-Right) */}
+          <motion.div
+            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 15, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: 0.3, duration: 0.45 }}
+            onClick={() => onLayerSelect && onLayerSelect(2)}
+            className={`pointer-events-auto absolute bottom-4 right-4 rounded-2xl border bg-black/60 backdrop-blur-xl px-4 py-3 shadow-2xl transition transform cursor-pointer max-w-[190px] ${
+              activeLayer === 2
+                ? "border-purple-400 ring-2 ring-purple-400/30 bg-purple-950/40 shadow-purple-500/20"
+                : "border-white/10 hover:border-purple-400/50 hover:bg-black/80 hover:-translate-y-0.5"
+            }`}
+          >
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Service Fee</div>
+            <div className="text-lg font-bold text-white tracking-tight">+₹49</div>
+            <div className="text-[10px] font-medium text-slate-400 mt-0.5">Platform packaging fee</div>
           </motion.div>
         </div>
       </div>
 
       {/* ======================================================== */}
-      {/* MOBILE 2x2 BALANCED GRID (Zero-Overlap Responsive Fallback) */}
+      {/* MOBILE 2x2 DARK GLASS GRID (Zero-Overlap Responsive Fallback) */}
       {/* ======================================================== */}
-      <div className="sm:hidden grid grid-cols-2 gap-2 mt-2 px-1">
-        {/* Label 1 (Mobile Hero Focus) */}
+      <div className="sm:hidden grid grid-cols-2 gap-2 mt-3 px-1">
         <div
           onClick={() => onLayerSelect && onLayerSelect(0)}
-          className={`rounded-xl border-2 border-blue-600 bg-white p-2.5 shadow-md ${
-            activeLayer === 0 ? "ring-2 ring-blue-500/20 bg-blue-50/40" : ""
+          className={`rounded-xl border bg-black/70 backdrop-blur-md p-2.5 ${
+            activeLayer === 0 ? "border-blue-500 ring-2 ring-blue-500/20 bg-blue-950/30" : "border-white/10"
           }`}
         >
-          <div className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Product Price</div>
-          <div className="text-xl font-black text-slate-900 mt-0.5">₹999</div>
-          <span className="text-[9px] font-semibold text-emerald-600">Base sticker rate</span>
+          <div className="text-[10px] font-bold text-blue-400 uppercase tracking-wider">Product Price</div>
+          <div className="text-xl font-black text-white mt-0.5">₹999</div>
+          <span className="text-[9px] font-semibold text-emerald-400">Base sticker rate</span>
         </div>
 
-        {/* Label 4 (Mobile Optional) */}
         <div
           onClick={() => onLayerSelect && onLayerSelect(3)}
-          className={`rounded-xl border border-amber-200 bg-white p-2.5 shadow-xs ${
-            activeLayer === 3 ? "ring-2 ring-amber-400/30 bg-amber-50/50" : ""
+          className={`rounded-xl border bg-black/70 backdrop-blur-md p-2.5 ${
+            activeLayer === 3 ? "border-amber-400 ring-2 ring-amber-400/20 bg-amber-950/30" : "border-white/10"
           }`}
         >
           <div className="flex items-center justify-between mb-0.5">
-            <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider">Protection</span>
-            <span className="rounded bg-amber-50 px-1 py-0.2 text-[8px] font-bold text-amber-700 border border-amber-200">
+            <span className="text-[10px] font-semibold text-slate-300 uppercase tracking-wider">Protection</span>
+            <span className="rounded bg-amber-500/20 px-1 py-0.2 text-[8px] font-bold text-amber-400 border border-amber-500/30">
               OPTIONAL
             </span>
           </div>
-          <div className="text-base font-bold text-slate-900">+₹99</div>
-          <span className="text-[9px] font-medium text-amber-700">Pre-ticked add-on</span>
+          <div className="text-base font-bold text-white">+₹99</div>
+          <span className="text-[9px] font-medium text-amber-400">Pre-ticked add-on</span>
         </div>
 
-        {/* Label 2 (Mobile Mandatory) */}
         <div
           onClick={() => onLayerSelect && onLayerSelect(1)}
-          className={`rounded-xl border border-slate-200 bg-white p-2.5 shadow-xs ${
-            activeLayer === 1 ? "ring-2 ring-indigo-400/30 bg-indigo-50/50" : ""
+          className={`rounded-xl border bg-black/70 backdrop-blur-md p-2.5 ${
+            activeLayer === 1 ? "border-indigo-400 ring-2 ring-indigo-400/20 bg-indigo-950/30" : "border-white/10"
           }`}
         >
-          <div className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider">Handling Fee</div>
-          <div className="text-base font-bold text-slate-900 mt-0.5">+₹29</div>
-          <span className="text-[9px] font-medium text-slate-500">Mandatory fee</span>
+          <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Handling Fee</div>
+          <div className="text-base font-bold text-white mt-0.5">+₹29</div>
+          <span className="text-[9px] font-medium text-slate-400">Mandatory fee</span>
         </div>
 
-        {/* Label 3 (Mobile Mandatory) */}
         <div
           onClick={() => onLayerSelect && onLayerSelect(2)}
-          className={`rounded-xl border border-slate-200 bg-white p-2.5 shadow-xs ${
-            activeLayer === 2 ? "ring-2 ring-purple-400/30 bg-purple-50/50" : ""
+          className={`rounded-xl border bg-black/70 backdrop-blur-md p-2.5 ${
+            activeLayer === 2 ? "border-purple-400 ring-2 ring-purple-400/20 bg-purple-950/30" : "border-white/10"
           }`}
         >
-          <div className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider">Service Fee</div>
-          <div className="text-base font-bold text-slate-900 mt-0.5">+₹49</div>
-          <span className="text-[9px] font-medium text-slate-500">Mandatory fee</span>
+          <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Service Fee</div>
+          <div className="text-base font-bold text-white mt-0.5">+₹49</div>
+          <span className="text-[9px] font-medium text-slate-400">Platform fee</span>
         </div>
       </div>
 
       {/* Disclosing Illustrative Sample Data Note */}
-      <div className="mt-2.5 flex items-center justify-center gap-1.5 text-[10px] text-slate-400 font-medium text-center">
-        <Info className="h-3 w-3 text-slate-400 shrink-0" />
-        <span>Illustrative demo breakdown · TinySleuth inspects real checkouts on demand</span>
+      <div className="mt-3 flex items-center justify-center gap-1.5 text-[10px] text-slate-500 font-medium text-center">
+        <Sparkles className="h-3 w-3 text-amber-400 shrink-0" />
+        <span>Continuous Refractive 3D AI Audit Visualization · Interactive Parallax</span>
       </div>
     </div>
   );
