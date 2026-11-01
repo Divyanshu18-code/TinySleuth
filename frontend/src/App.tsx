@@ -625,11 +625,9 @@ export default function App() {
             </div>
           </div>
 
-          {/* Right Column: Rotating 3D Glass Sculpture matching Reference Video */}
-          <div className="lg:col-span-5 relative flex items-center justify-center">
-            <div className="w-full relative h-[480px] sm:h-[580px] lg:h-[660px]">
-              <ThreeDPriceStack isAuditing={loading} />
-            </div>
+          {/* Right Column: Circular 3D Glass Sculpture matching user's exact specification */}
+          <div className="lg:col-span-5 relative flex items-center justify-center py-4 sm:py-6">
+            <ThreeDPriceStack isAuditing={loading} />
           </div>
         </div>
 
