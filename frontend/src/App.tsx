@@ -20,7 +20,6 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { startAudit, type AuditResponse } from "./api";
-import ThreeDPriceStack from "./components/ThreeDPriceStack";
 import ColorBends from "./components/ColorBends";
 
 // Verified demo datasets for hackathon presentation and offline evaluation
@@ -409,19 +408,19 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#06060c] text-white font-sans antialiased selection:bg-blue-600 selection:text-white relative overflow-x-hidden">
       {/* Dynamic React Bits ColorBends Wave Flow in Background */}
-      <div className="fixed inset-0 pointer-events-none z-0 opacity-40">
+      <div className="fixed inset-0 pointer-events-none z-0">
         <ColorBends
-          colors={["#2563eb", "#7c3aed", "#00ffd1", "#f59e0b"]}
+          colors={["#ff5c7a", "#8a5cff", "#00ffd1"]}
           rotation={90}
-          speed={0.18}
-          scale={1.1}
+          speed={0.2}
+          scale={1}
           frequency={1}
           warpStrength={1}
-          mouseInfluence={0.8}
-          parallax={0.4}
-          noise={0.12}
-          iterations={2}
-          intensity={1.4}
+          mouseInfluence={1}
+          parallax={0.5}
+          noise={0.15}
+          iterations={1}
+          intensity={1.5}
           bandWidth={6}
           transparent
         />
@@ -502,15 +501,10 @@ export default function App() {
         </div>
       </header>
 
-      {/* 2. Hero Section with 3D Animation Running in Background */}
+      {/* 2. Hero Section with ColorBends Running in Background */}
       <main className="relative z-10 mx-auto max-w-7xl px-4 sm:px-8 pt-6 sm:pt-12 pb-16">
         <div className="relative min-h-[580px] lg:min-h-[640px] flex items-center">
-          {/* 3D Glass Sculpture Running Transparently in the Background */}
-          <div className="absolute right-[-8%] sm:right-[-4%] lg:right-[0%] top-1/2 -translate-y-1/2 w-[380px] sm:w-[540px] lg:w-[680px] h-[380px] sm:h-[540px] lg:h-[680px] pointer-events-none z-0 flex items-center justify-center">
-            <ThreeDPriceStack isAuditing={loading} />
-          </div>
-
-          {/* Foreground Content: All Text and Objects Floating Over 3D Background */}
+          {/* Foreground Content: All Text and Objects Floating Over ColorBends Background */}
           <div className="relative z-10 max-w-2xl lg:max-w-3xl space-y-6">
             {/* Kicker with Glowing Emerald Dot */}
             <div className="inline-flex items-center gap-2 text-xs font-semibold text-slate-300 tracking-wide bg-white/[0.05] backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10 shadow-lg">
