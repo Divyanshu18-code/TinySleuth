@@ -43,7 +43,6 @@ export const LAYER_DATA = [
 export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
   isAuditing = false,
   activeLayer = 0,
-  onLayerSelect,
   className = "",
 }) => {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -161,65 +160,52 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
     // 5. Create 3D Magnifying Glass
     const glassGroup = new THREE.Group();
 
-    // Vibrant Royal Blue metallic material for rim and handle
+    // Vibrant Royal Blue metallic material for rim and handle (identical to reference mockup)
     const glassBlueMat = new THREE.MeshStandardMaterial({
-      color: 0x1346d9,
-      roughness: 0.12,
-      metalness: 0.82,
+      color: 0x1247dd,
+      roughness: 0.14,
+      metalness: 0.78,
     });
 
-    // Metallic deep-blue rim (Torus)
-    const rimGeom = new THREE.TorusGeometry(1.35, 0.19, 32, 72);
+    // Sleek metallic royal blue rim (Torus)
+    const rimGeom = new THREE.TorusGeometry(1.15, 0.13, 32, 64);
     const rimMesh = new THREE.Mesh(rimGeom, glassBlueMat);
     rimMesh.castShadow = true;
     glassGroup.add(rimMesh);
 
-    // Convex glass lens with high transmission and realistic refraction
-    const lensGeom = new THREE.CylinderGeometry(1.31, 1.31, 0.04, 48);
+    // Crystal-clear convex glass lens
+    const lensGeom = new THREE.CylinderGeometry(1.12, 1.12, 0.02, 48);
     const lensMat = new THREE.MeshPhysicalMaterial({
       color: 0xffffff,
-      transmission: 0.92,
-      roughness: 0.05,
-      ior: 1.5,
+      transmission: 0.95,
+      roughness: 0.04,
+      ior: 1.45,
       transparent: true,
-      opacity: 0.40,
-      reflectivity: 0.85,
+      opacity: 0.22,
+      reflectivity: 0.75,
     });
     const lensMesh = new THREE.Mesh(lensGeom, lensMat);
     lensMesh.rotation.x = Math.PI / 2;
     glassGroup.add(lensMesh);
 
-    // Chrome/Silver connector collar at rim junction
-    const neckGeom = new THREE.CylinderGeometry(0.18, 0.18, 0.22, 24);
-    const neckMat = new THREE.MeshStandardMaterial({
-      color: 0xd1d5db,
-      roughness: 0.15,
-      metalness: 0.85,
-    });
-    const neckMesh = new THREE.Mesh(neckGeom, neckMat);
-    neckMesh.position.set(-1.08, -1.08, 0);
-    neckMesh.rotation.z = Math.PI / 4;
-    neckMesh.castShadow = true;
-    glassGroup.add(neckMesh);
-
-    // Sleek ergonomic handle extending at 45 degrees
-    const handleGeom = new THREE.CylinderGeometry(0.16, 0.14, 1.6, 24);
+    // Ergonomic handle smoothly integrated into the rim at -135 degrees (45 deg tilt)
+    const handleGeom = new THREE.CylinderGeometry(0.13, 0.11, 1.5, 24);
     const handleMesh = new THREE.Mesh(handleGeom, glassBlueMat);
-    handleMesh.position.set(-1.62, -1.62, 0);
+    handleMesh.position.set(-1.35, -1.35, 0);
     handleMesh.rotation.z = Math.PI / 4;
     handleMesh.castShadow = true;
     glassGroup.add(handleMesh);
 
-    // Handle tip rounded cap
-    const capGeom = new THREE.SphereGeometry(0.15, 20, 20);
+    // Polished rounded tip cap
+    const capGeom = new THREE.SphereGeometry(0.12, 20, 20);
     const capMesh = new THREE.Mesh(capGeom, glassBlueMat);
-    capMesh.position.set(-2.18, -2.18, 0);
+    capMesh.position.set(-1.88, -1.88, 0);
     glassGroup.add(capMesh);
 
-    // Align magnifying glass directly toward camera view vector
-    glassGroup.position.set(1.2, 0.65, 2.2);
+    // Position magnifying glass framing the upper-right section of the stack
+    glassGroup.position.set(1.4, 0.95, 2.0);
     glassGroup.rotation.order = "YXZ";
-    glassGroup.rotation.y = 0.68;
+    glassGroup.rotation.y = 0.65;
     glassGroup.rotation.x = -0.32;
     scene.add(glassGroup);
 
@@ -254,10 +240,7 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
     let animationFrameId: number;
     let clock = new THREE.Clock();
 
-    // Magnifying glass target coordinates framing the 4 layers
-    // Base layer (0): y ~ 0.35, Handling (1): y ~ 0.60, Service (2): y ~ 0.88, Protection (3): y ~ 1.20
-    const layerTargetY = [0.35, 0.60, 0.88, 1.20];
-
+    // Magnifying glass idle and scan animation
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
       const elapsedTime = clock.getElapsedTime();
@@ -275,12 +258,12 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
       // Dynamic Magnifying Glass Motion
       if (auditStateRef.current) {
         // Active Audit scanning motion: sweeping smoothly up and down across the layers!
-        const scanCycle = (Math.sin(elapsedTime * 3.2) + 1) / 2; // 0 to 1
-        const targetY = 0.25 + scanCycle * 1.05;
+        const scanCycle = (Math.sin(elapsedTime * 3.5) + 1) / 2; // 0 to 1
+        const targetY = 0.45 + scanCycle * 0.8;
         glassGroup.position.y += (targetY - glassGroup.position.y) * 0.15;
-        glassGroup.position.x = 1.25 + Math.cos(elapsedTime * 2.2) * 0.15;
-        glassGroup.position.z = 2.15 + Math.sin(elapsedTime * 1.8) * 0.12;
-        glassGroup.rotation.z = Math.sin(elapsedTime * 2.8) * 0.06;
+        glassGroup.position.x = 1.38 + Math.cos(elapsedTime * 2.2) * 0.12;
+        glassGroup.position.z = 2.0 + Math.sin(elapsedTime * 1.8) * 0.1;
+        glassGroup.rotation.z = Math.sin(elapsedTime * 2.8) * 0.05;
 
         // Animate slabs reacting to the scan
         slabMeshes.forEach((slab, idx) => {
@@ -292,26 +275,21 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
           }
         });
       } else {
-        // Idle / Layer-focused state
-        const targetIdx = Math.max(0, Math.min(3, activeLayerRef.current));
-        const hoverOffset = Math.sin(elapsedTime * 1.6) * 0.04;
-        const targetY = layerTargetY[targetIdx] + hoverOffset;
-        const targetX = 1.28 + Math.cos(elapsedTime * 1.1) * 0.04;
+        // Idle / Layer-focused state: gracefully framing the upper-right stack
+        const hoverOffsetY = Math.sin(elapsedTime * 1.5) * 0.04;
+        const hoverOffsetX = Math.cos(elapsedTime * 1.2) * 0.03;
+        const targetY = 0.95 + hoverOffsetY;
+        const targetX = 1.40 + hoverOffsetX;
 
         glassGroup.position.y += (targetY - glassGroup.position.y) * 0.08;
         glassGroup.position.x += (targetX - glassGroup.position.x) * 0.08;
-        glassGroup.position.z += (2.2 - glassGroup.position.z) * 0.08;
-        glassGroup.rotation.z = Math.sin(elapsedTime * 1.4) * 0.02;
+        glassGroup.position.z += (2.0 - glassGroup.position.z) * 0.08;
+        glassGroup.rotation.z = Math.sin(elapsedTime * 1.3) * 0.02;
 
-        // Highlight active layer slightly
+        // Gentle ambient breathing of slabs
         slabMeshes.forEach((slab, idx) => {
-          if (idx === targetIdx) {
-            slab.position.y = basePositionsY[idx] + 0.08;
-            slab.scale.lerp(new THREE.Vector3(1.03, 1.03, 1.03), 0.1);
-          } else {
-            slab.position.y = basePositionsY[idx];
-            slab.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1);
-          }
+          const targetScale = idx === activeLayerRef.current ? 1.02 : 1.0;
+          slab.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
         });
       }
 
@@ -349,56 +327,8 @@ export const ThreeDPriceStack: React.FC<ThreeDPriceStackProps> = ({
 
   return (
     <div className={`relative w-full h-[380px] sm:h-[460px] select-none ${className}`}>
-      {/* Three.js Canvas Container */}
+      {/* Pure 3D WebGL Canvas */}
       <div ref={mountRef} className="w-full h-full cursor-pointer" />
-
-      {/* Floating 3D Pills (Overlay Matching Screenshot) */}
-      <div className="absolute inset-0 pointer-events-none flex flex-col justify-center items-end pr-3 sm:pr-8 space-y-4 sm:space-y-6">
-        {/* Layer 4: Protection plan */}
-        <div
-          onClick={() => onLayerSelect && onLayerSelect(3)}
-          className={`pointer-events-auto flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/95 px-3 sm:px-4 py-1 sm:py-1.5 shadow-md shadow-slate-900/5 backdrop-blur-xs transition transform hover:scale-105 cursor-pointer ${
-            activeLayer === 3 ? "ring-2 ring-amber-400 bg-amber-50/90" : ""
-          }`}
-          style={{ transform: "translateY(-10px)" }}
-        >
-          <span className="text-xs sm:text-sm font-bold text-slate-800">+₹99 Protection plan</span>
-          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[9px] sm:text-[10px] font-bold text-amber-800 uppercase tracking-wider">
-            OPTIONAL
-          </span>
-        </div>
-
-        {/* Layer 3: Service fee */}
-        <div
-          onClick={() => onLayerSelect && onLayerSelect(2)}
-          className={`pointer-events-auto flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/95 px-3 sm:px-4 py-1 sm:py-1.5 shadow-md shadow-slate-900/5 backdrop-blur-xs transition transform hover:scale-105 cursor-pointer ${
-            activeLayer === 2 ? "ring-2 ring-purple-400 bg-purple-50/90" : ""
-          }`}
-        >
-          <span className="text-xs sm:text-sm font-bold text-slate-800">+₹49 Service fee</span>
-        </div>
-
-        {/* Layer 2: Handling fee */}
-        <div
-          onClick={() => onLayerSelect && onLayerSelect(1)}
-          className={`pointer-events-auto flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/95 px-3 sm:px-4 py-1 sm:py-1.5 shadow-md shadow-slate-900/5 backdrop-blur-xs transition transform hover:scale-105 cursor-pointer ${
-            activeLayer === 1 ? "ring-2 ring-indigo-400 bg-indigo-50/90" : ""
-          }`}
-        >
-          <span className="text-xs sm:text-sm font-bold text-slate-800">+₹29 Handling fee</span>
-        </div>
-
-        {/* Layer 1: Product base price */}
-        <div
-          onClick={() => onLayerSelect && onLayerSelect(0)}
-          className={`pointer-events-auto flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/95 px-3.5 sm:px-4.5 py-1 sm:py-1.5 shadow-md shadow-slate-900/5 backdrop-blur-xs transition transform hover:scale-105 cursor-pointer ${
-            activeLayer === 0 ? "ring-2 ring-blue-500 bg-blue-50/90" : ""
-          }`}
-          style={{ transform: "translateY(10px)" }}
-        >
-          <span className="text-xs sm:text-sm font-bold text-slate-900">₹999 Product price</span>
-        </div>
-      </div>
     </div>
   );
 };
