@@ -546,9 +546,9 @@ export default function App() {
             </div>
           </div>
 
-          {/* Right Column: 3D Layer Stack & Magnifying Glass */}
+          {/* Right Column: 3D Product Box & Price Truth Inspector */}
           <div className="lg:col-span-5 relative">
-            <div className="rounded-3xl border border-slate-100 bg-gradient-to-tr from-white via-indigo-50/30 to-purple-50/40 p-2 sm:p-4 shadow-xl shadow-indigo-500/5">
+            <div className="relative rounded-3xl border border-slate-200/80 bg-white/80 backdrop-blur-sm p-2 sm:p-4 shadow-xl shadow-slate-900/5 overflow-hidden">
               <ThreeDPriceStack
                 isAuditing={loading}
                 activeLayer={activeStoryIndex}
