@@ -37,9 +37,19 @@ BLOCKED_IP_NETWORKS = [
 ]
 
 
+NAT64_PREFIX = ipaddress.ip_network("64:ff9b::/96")
+
+
 def is_ip_blocked(ip: ipaddress.IPv4Address | ipaddress.IPv6Address) -> bool:
     """Return True if IP is private, loopback, link-local, reserved, or multicast."""
-    if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_multicast or ip.is_reserved:
+    # Special handling for RFC 6052 IPv4/IPv6 translation prefix used by mobile/ISP networks
+    if isinstance(ip, ipaddress.IPv6Address) and ip in NAT64_PREFIX:
+        embedded_v4 = ipaddress.IPv4Address(ip.packed[-4:])
+        return is_ip_blocked(embedded_v4)
+
+    if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_multicast:
+        return True
+    if ip.is_reserved and not ip.is_global:
         return True
     for net in BLOCKED_IP_NETWORKS:
         if ip in net:

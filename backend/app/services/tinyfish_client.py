@@ -40,12 +40,12 @@ AUDIT STEPS:
 OUTPUT_SCHEMA: dict[str, Any] = {
     "type": "object",
     "properties": {
-        "product_title": {"type": ["string", "null"]},
-        "currency": {"type": ["string", "null"]},
-        "initial_price": {"type": ["number", "null"]},
-        "final_displayed_total": {"type": ["number", "null"]},
+        "product_title": {"type": "string", "nullable": True},
+        "currency": {"type": "string", "nullable": True},
+        "initial_price": {"type": "number", "nullable": True},
+        "final_displayed_total": {"type": "number", "nullable": True},
         "reached_checkout": {"type": "boolean"},
-        "blocked_reason": {"type": ["string", "null"]},
+        "blocked_reason": {"type": "string", "nullable": True},
         "charges": {
             "type": "array",
             "items": {
@@ -54,10 +54,10 @@ OUTPUT_SCHEMA: dict[str, Any] = {
                     "label": {"type": "string"},
                     "amount": {"type": "number"},
                     "classification": {"type": "string"},
-                    "mandatory": {"type": ["boolean", "null"]},
+                    "mandatory": {"type": "boolean", "nullable": True},
                     "preselected": {"type": "boolean"},
-                    "disclosed_before_checkout": {"type": ["boolean", "null"]},
-                    "evidence": {"type": ["string", "null"]},
+                    "disclosed_before_checkout": {"type": "boolean", "nullable": True},
+                    "evidence": {"type": "string", "nullable": True},
                 },
                 "required": ["label", "amount"],
             },
@@ -83,15 +83,10 @@ async def run_audit(url: str) -> TinyFishRun:
         "X-API-Key": settings.tinyfish_api_key,
         "Content-Type": "application/json",
     }
-    payload = {
+    payload: dict[str, Any] = {
         "url": url,
         "goal": AUDIT_GOAL,
         "output_schema": OUTPUT_SCHEMA,
-        "agent_config": {
-            "mode": "strict",
-            "max_steps": 40,
-            "max_duration_seconds": min(settings.tinyfish_timeout_seconds, 240),
-        },
     }
 
     try:

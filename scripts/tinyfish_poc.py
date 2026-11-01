@@ -13,6 +13,14 @@ from pathlib import Path
 # Add backend directory to path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "backend"))
 
+# Ensure Windows PowerShell handles unicode emojis safely
+if sys.stdout.encoding != "utf-8":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 from app.core.security import validate_target_url  # noqa: E402
 from app.services.detection_service import generate_findings  # noqa: E402
 from app.services.parser import parse_pricing  # noqa: E402
