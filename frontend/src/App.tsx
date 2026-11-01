@@ -257,7 +257,6 @@ export default function App() {
   const [showRawJson, setShowRawJson] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isDemoData, setIsDemoData] = useState(false);
-  const [activeStoryIndex, setActiveStoryIndex] = useState(0);
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const timerRef = useRef<number | null>(null);
@@ -616,11 +615,7 @@ export default function App() {
           {/* Right Column: Rotating 3D Glass Sculpture matching Reference Video */}
           <div className="lg:col-span-5 relative flex items-center justify-center">
             <div className="w-full relative">
-              <ThreeDPriceStack
-                isAuditing={loading}
-                activeLayer={activeStoryIndex}
-                onLayerSelect={(idx) => setActiveStoryIndex(idx)}
-              />
+              <ThreeDPriceStack isAuditing={loading} />
             </div>
           </div>
         </div>
@@ -660,72 +655,7 @@ export default function App() {
           </div>
         </section>
 
-        {/* 4. Progressive Anatomy Story Cards */}
-        <section className="mt-20 pt-10 border-t border-white/[0.08]">
-          <div className="text-center max-w-2xl mx-auto mb-10">
-            <span className="text-xs font-bold uppercase tracking-wider text-blue-400">The Pricing Anatomy</span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white mt-1">Watch how the price comes apart.</h2>
-            <p className="text-xs sm:text-sm text-slate-400 mt-2">
-              From the advertised sticker price to the hidden checkmarks, see every fee layer before paying.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Step 01 */}
-            <div
-              onClick={() => setActiveStoryIndex(0)}
-              className={`rounded-2xl border p-6 dark-glass transition cursor-pointer ${
-                activeStoryIndex === 0
-                  ? "border-blue-500/70 bg-blue-950/30 shadow-lg shadow-blue-500/10 ring-1 ring-blue-500/30"
-                  : "hover:border-white/20"
-              }`}
-            >
-              <span className="text-[11px] font-bold uppercase tracking-wider text-blue-400">01 · THE STICKER PRICE</span>
-              <div className="text-3xl sm:text-4xl font-black text-white mt-2 mb-3">₹999</div>
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                This is what the product page shows you. It is the number you decide on.
-              </p>
-            </div>
-
-            {/* Step 02 */}
-            <div
-              onClick={() => setActiveStoryIndex(1)}
-              className={`rounded-2xl border p-6 dark-glass transition cursor-pointer ${
-                activeStoryIndex === 1 || activeStoryIndex === 2
-                  ? "border-indigo-500/70 bg-indigo-950/30 shadow-lg shadow-indigo-500/10 ring-1 ring-indigo-500/30"
-                  : "hover:border-white/20"
-              }`}
-            >
-              <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-400">
-                02 · THE MANDATORY LAYERS
-              </span>
-              <div className="text-3xl sm:text-4xl font-black text-white mt-2 mb-3">₹1,077</div>
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                Handling ₹29 and a service fee of ₹49 appear on the way to checkout. They are not optional, so TinySleuth counts them in the real total.
-              </p>
-            </div>
-
-            {/* Step 03 */}
-            <div
-              onClick={() => setActiveStoryIndex(3)}
-              className={`rounded-2xl border p-6 dark-glass transition cursor-pointer ${
-                activeStoryIndex === 3
-                  ? "border-amber-500/70 bg-amber-950/30 shadow-lg shadow-amber-500/10 ring-1 ring-amber-500/30"
-                  : "hover:border-white/20"
-              }`}
-            >
-              <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400">
-                03 · THE HIDDEN CHECKMARKS
-              </span>
-              <div className="text-3xl sm:text-4xl font-black text-white mt-2 mb-3">₹1,176</div>
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                A ₹99 protection plan pre-ticked by default. If you don't deselect it, this becomes your checkout reality.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* 5. Active Loading Tracker */}
+        {/* 4. Active Loading Tracker */}
         <AnimatePresence>
           {loading && (
             <motion.div
