@@ -408,32 +408,34 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#06060c] text-white font-sans antialiased selection:bg-blue-600 selection:text-white relative overflow-x-hidden">
       {/* Dynamic React Bits ColorBends Wave Flow in Background */}
-      <div className="fixed inset-0 pointer-events-none z-0">
+      <div className="fixed inset-0 pointer-events-none z-0 opacity-40">
         <ColorBends
           colors={["#ff5c7a", "#8a5cff", "#00ffd1"]}
           rotation={90}
-          speed={0.2}
-          scale={1}
-          frequency={1}
-          warpStrength={1}
-          mouseInfluence={1}
-          parallax={0.5}
-          noise={0.15}
+          speed={0.16}
+          scale={1.2}
+          frequency={0.85}
+          warpStrength={0.8}
+          mouseInfluence={0.5}
+          parallax={0.3}
+          noise={0.03}
           iterations={1}
-          intensity={1.5}
-          bandWidth={6}
+          intensity={0.75}
+          bandWidth={4.5}
           transparent
         />
       </div>
 
       {/* Cinematic Ambient Background Lighting Glows */}
       <div className="fixed inset-0 pointer-events-none z-0">
+        {/* Soft dark veil to preserve crisp text contrast */}
+        <div className="absolute inset-0 bg-[#06060c]/30" />
         {/* Deep Plum & Violet Radial Bloom (Top-Left) */}
-        <div className="absolute top-[-10%] left-[-10%] w-[65vw] h-[65vw] rounded-full bg-[radial-gradient(circle,rgba(124,58,237,0.18)_0%,rgba(91,33,182,0.08)_40%,transparent_70%)] blur-[90px]" />
+        <div className="absolute top-[-10%] left-[-10%] w-[65vw] h-[65vw] rounded-full bg-[radial-gradient(circle,rgba(124,58,237,0.12)_0%,rgba(91,33,182,0.05)_40%,transparent_70%)] blur-[90px]" />
         {/* Molten Copper & Amber Accent Bloom (Top-Right / 3D Side) */}
-        <div className="absolute top-[5%] right-[-5%] w-[50vw] h-[50vw] rounded-full bg-[radial-gradient(circle,rgba(245,158,11,0.10)_0%,rgba(217,119,6,0.04)_45%,transparent_70%)] blur-[100px]" />
+        <div className="absolute top-[5%] right-[-5%] w-[50vw] h-[50vw] rounded-full bg-[radial-gradient(circle,rgba(245,158,11,0.08)_0%,rgba(217,119,6,0.03)_45%,transparent_70%)] blur-[100px]" />
         {/* Electric Royal Blue Ambient Underbelly */}
-        <div className="absolute bottom-[-10%] left-[20%] w-[55vw] h-[55vw] rounded-full bg-[radial-gradient(circle,rgba(37,99,235,0.08)_0%,transparent_60%)] blur-[100px]" />
+        <div className="absolute bottom-[-10%] left-[20%] w-[55vw] h-[55vw] rounded-full bg-[radial-gradient(circle,rgba(37,99,235,0.06)_0%,transparent_60%)] blur-[100px]" />
       </div>
 
       {/* Far-Left Vertical SCROLL Tracker (Exact match to reference video) */}
@@ -646,12 +648,12 @@ export default function App() {
         </div>
 
         {/* 3. Bottom 3-Counter Stats Row (Floating in Foreground) */}
-        <section className="relative z-10 mt-16 sm:mt-24 pt-10 border-t border-white/[0.08] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
+        <section className="relative z-10 mt-16 sm:mt-24 p-6 sm:p-7 rounded-2xl border border-white/10 bg-[#0c101d]/85 backdrop-blur-2xl shadow-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-16 w-full max-w-3xl">
             {/* Stat 1 */}
             <div>
               <div className="text-2xl sm:text-3xl font-black text-white tracking-tight">₹14.2L+</div>
-              <div className="text-[10px] sm:text-[11px] font-semibold text-slate-400 uppercase tracking-widest mt-1">
+              <div className="text-[10px] sm:text-[11px] font-semibold text-slate-300 uppercase tracking-widest mt-1">
                 Total Surcharges Exposed
               </div>
             </div>
@@ -659,7 +661,7 @@ export default function App() {
             {/* Stat 2 */}
             <div>
               <div className="text-2xl sm:text-3xl font-black text-white tracking-tight">99.8%</div>
-              <div className="text-[10px] sm:text-[11px] font-semibold text-slate-400 uppercase tracking-widest mt-1">
+              <div className="text-[10px] sm:text-[11px] font-semibold text-slate-300 uppercase tracking-widest mt-1">
                 Detection Accuracy
               </div>
             </div>
@@ -667,14 +669,20 @@ export default function App() {
             {/* Stat 3 */}
             <div>
               <div className="text-2xl sm:text-3xl font-black text-white tracking-tight">&lt; 2.4s</div>
-              <div className="text-[10px] sm:text-[11px] font-semibold text-slate-400 uppercase tracking-widest mt-1">
+              <div className="text-[10px] sm:text-[11px] font-semibold text-slate-300 uppercase tracking-widest mt-1">
                 AI Audit Engine
               </div>
             </div>
           </div>
 
           {/* Scroll Down Indicator (Bottom Right) */}
-          <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition cursor-pointer">
+          <div
+            onClick={() => {
+              const el = document.getElementById("features");
+              el?.scrollIntoView({ behavior: "smooth" });
+            }}
+            className="hidden sm:flex items-center gap-1.5 text-xs text-slate-300 hover:text-white transition cursor-pointer shrink-0"
+          >
             <span>Scroll Down</span>
             <span>↓</span>
           </div>
@@ -757,14 +765,14 @@ export default function App() {
               >
                 {/* Demo Mode Notice Banner */}
                 {isDemoData && (
-                  <div className="flex items-center justify-between rounded-xl border border-amber-500/30 bg-amber-950/40 px-4 py-2.5 text-xs text-amber-200">
+                  <div className="flex items-center justify-between rounded-xl border border-amber-500/40 bg-[#171105]/95 backdrop-blur-xl px-4 py-2.5 text-xs text-amber-200 shadow-lg">
                     <div className="flex items-center gap-2">
                       <Info className="h-4 w-4 text-amber-400 shrink-0" />
                       <span>
                         <strong>DEMO EVALUATION DATA:</strong> This report represents verified pre-recorded pricing evidence for evaluation purposes.
                       </span>
                     </div>
-                    <span className="font-semibold uppercase tracking-wider text-[10px] bg-amber-500/20 px-2 py-0.5 rounded text-amber-300">
+                    <span className="font-semibold uppercase tracking-wider text-[10px] bg-amber-500/20 px-2 py-0.5 rounded text-amber-300 border border-amber-500/30">
                       Demo Data
                     </span>
                   </div>
@@ -772,15 +780,15 @@ export default function App() {
 
                 {/* Top Verdict Status Banner */}
                 <div
-                  className={`rounded-2xl border p-6 shadow-2xl ${
+                  className={`rounded-2xl border p-6 shadow-2xl backdrop-blur-2xl ${
                     isLoginWall
-                      ? "bg-blue-950/30 border-blue-500/30"
+                      ? "bg-[#0b1329]/95 border-blue-500/40"
                       : result.status === "inconclusive"
-                      ? "bg-amber-950/30 border-amber-500/30"
+                      ? "bg-[#1f1707]/95 border-amber-500/40"
                       : (summary?.price_difference ?? 0) > 0 ||
                         result.findings.some((f) => f.category === "preselected_addon")
-                      ? "bg-rose-950/30 border-rose-500/30"
-                      : "bg-emerald-950/30 border-emerald-500/30"
+                      ? "bg-[#1f0b12]/95 border-rose-500/40"
+                      : "bg-[#081f14]/95 border-emerald-500/40"
                   }`}
                 >
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -844,7 +852,7 @@ export default function App() {
                             : "Initial price matches final checkout total"}
                         </h2>
 
-                        <p className="mt-1 text-xs sm:text-sm text-slate-400">
+                        <p className="mt-1 text-xs sm:text-sm text-slate-300 font-medium">
                           {result.product_title ? `Product: ${result.product_title}` : `Target: ${result.url}`}
                         </p>
                       </div>
@@ -856,9 +864,9 @@ export default function App() {
                         setUrl("");
                         window.scrollTo({ top: 0, behavior: "smooth" });
                       }}
-                      className="shrink-0 flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3.5 py-2 text-xs font-semibold text-slate-200 hover:bg-white/[0.08] hover:text-white transition"
+                      className="shrink-0 flex items-center gap-1.5 rounded-lg border border-white/12 bg-white/[0.08] hover:bg-white/[0.14] px-3.5 py-2 text-xs font-semibold text-white transition shadow-sm"
                     >
-                      <RefreshCw className="h-3.5 w-3.5 text-slate-400" />
+                      <RefreshCw className="h-3.5 w-3.5 text-slate-300" />
                       <span>New Audit</span>
                     </button>
                   </div>
@@ -866,7 +874,7 @@ export default function App() {
 
                 {/* Login Wall Explanatory Callout Banner */}
                 {isLoginWall && (
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6 shadow-xl space-y-4">
+                  <div className="rounded-2xl border border-white/12 bg-[#0c101d]/95 backdrop-blur-2xl p-5 sm:p-6 shadow-2xl space-y-4">
                     <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
                       <div className="flex items-center gap-2.5">
                         <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400">
@@ -874,7 +882,7 @@ export default function App() {
                         </div>
                         <div>
                           <h4 className="font-bold text-white text-sm">Verified Transparent Pricing Rules ({merchantName})</h4>
-                          <p className="text-xs text-slate-400">What you pay before and after logging in</p>
+                          <p className="text-xs text-slate-300">What you pay before and after logging in</p>
                         </div>
                       </div>
                       <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-500/20 px-2.5 py-1 rounded-full border border-emerald-500/30">
@@ -884,14 +892,14 @@ export default function App() {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 pt-1">
                       {/* Delivery Rule */}
-                      <div className="rounded-xl border border-white/[0.06] bg-black/40 p-3.5">
-                        <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block mb-1">
+                      <div className="rounded-xl border border-white/10 bg-[#070914]/95 p-4 shadow-md">
+                        <span className="text-[11px] font-bold text-slate-200 uppercase tracking-wider block mb-1">
                           📦 Delivery Charges
                         </span>
                         <div className="text-sm font-bold text-white">
                           {merchantName.includes("Amazon") ? "Free > ₹499 or Prime" : "Standard ₹40 Flat"}
                         </div>
-                        <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                        <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
                           {merchantName.includes("Amazon")
                             ? "₹40 standard delivery applies only on non-Prime carts below ₹499."
                             : "Standard delivery charge applied based on pin code and seller."}
@@ -899,23 +907,23 @@ export default function App() {
                       </div>
 
                       {/* Payment Surcharge Rule */}
-                      <div className="rounded-xl border border-white/[0.06] bg-black/40 p-3.5">
-                        <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block mb-1">
+                      <div className="rounded-xl border border-white/10 bg-[#070914]/95 p-4 shadow-md">
+                        <span className="text-[11px] font-bold text-slate-200 uppercase tracking-wider block mb-1">
                           💳 Payment Fees
                         </span>
                         <div className="text-sm font-bold text-emerald-400">₹0 Convenience Fee</div>
-                        <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                        <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
                           Zero hidden payment processing surcharges on UPI, Credit/Debit cards, or Net Banking.
                         </p>
                       </div>
 
                       {/* Consumer Safety Rule */}
-                      <div className="rounded-xl border border-white/[0.06] bg-black/40 p-3.5">
-                        <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block mb-1">
+                      <div className="rounded-xl border border-white/10 bg-[#070914]/95 p-4 shadow-md">
+                        <span className="text-[11px] font-bold text-slate-200 uppercase tracking-wider block mb-1">
                           🛡️ Consumer Safety Guardrail
                         </span>
                         <div className="text-sm font-bold text-blue-400">Zero Credential Exposure</div>
-                        <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                        <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
                           TinySleuth strictly adheres to consumer safety standards and halts before asking for password or OTP.
                         </p>
                       </div>
@@ -927,10 +935,10 @@ export default function App() {
                 {summary && (
                   <div className="grid grid-cols-2 lg:grid-cols-5 gap-3.5">
                     {/* Initial Price */}
-                    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 shadow-lg">
-                      <div className="flex items-center justify-between text-slate-400 mb-1">
+                    <div className="rounded-xl border border-white/12 bg-[#0c101d]/95 backdrop-blur-2xl p-4 sm:p-5 shadow-2xl">
+                      <div className="flex items-center justify-between text-slate-300 mb-1.5">
                         <span className="text-[11px] font-semibold uppercase tracking-wider">Initial Price</span>
-                        <ShoppingBag className="h-3.5 w-3.5 text-slate-500" />
+                        <ShoppingBag className="h-3.5 w-3.5 text-slate-400" />
                       </div>
                       <div className="text-xl sm:text-2xl font-bold text-white">
                         {isLoginWall
@@ -939,16 +947,16 @@ export default function App() {
                           ? `${currency}${summary.initial_price.toLocaleString()}`
                           : "N/A"}
                       </div>
-                      <span className="text-[10px] text-slate-400">
+                      <span className="text-[11px] text-slate-300 font-medium mt-0.5 block">
                         {isLoginWall ? "GST included in sticker price" : "Advertised base rate"}
                       </span>
                     </div>
 
                     {/* Final Checkout Total */}
-                    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 shadow-lg">
-                      <div className="flex items-center justify-between text-slate-400 mb-1">
+                    <div className="rounded-xl border border-white/12 bg-[#0c101d]/95 backdrop-blur-2xl p-4 sm:p-5 shadow-2xl">
+                      <div className="flex items-center justify-between text-slate-300 mb-1.5">
                         <span className="text-[11px] font-semibold uppercase tracking-wider">Final Total</span>
-                        <Receipt className="h-3.5 w-3.5 text-slate-500" />
+                        <Receipt className="h-3.5 w-3.5 text-slate-400" />
                       </div>
                       <div className="text-xl sm:text-2xl font-bold text-white">
                         {isLoginWall ? (
@@ -959,63 +967,63 @@ export default function App() {
                           "N/A"
                         )}
                       </div>
-                      <span className="text-[10px] text-slate-400">
+                      <span className="text-[11px] text-slate-300 font-medium mt-0.5 block">
                         {isLoginWall ? "0 hidden markup added" : "At checkout screen"}
                       </span>
                     </div>
 
                     {/* Mandatory Additional Charges */}
-                    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 shadow-lg">
-                      <div className="flex items-center justify-between text-slate-400 mb-1">
+                    <div className="rounded-xl border border-white/12 bg-[#0c101d]/95 backdrop-blur-2xl p-4 sm:p-5 shadow-2xl">
+                      <div className="flex items-center justify-between text-slate-300 mb-1.5">
                         <span className="text-[11px] font-semibold uppercase tracking-wider">Mandatory Fees</span>
-                        <DollarSign className="h-3.5 w-3.5 text-slate-500" />
+                        <DollarSign className="h-3.5 w-3.5 text-slate-400" />
                       </div>
                       <div className="text-xl sm:text-2xl font-bold text-white">
                         {isLoginWall ? (
                           "₹0 - ₹40"
                         ) : summary.final_displayed_total === null && result.status === "inconclusive" ? (
-                          <span className="text-slate-500 text-lg sm:text-xl">Unverified</span>
+                          <span className="text-slate-400 text-lg sm:text-xl">Unverified</span>
                         ) : (
                           `${currency}${summary.mandatory_charges_total.toLocaleString()}`
                         )}
                       </div>
-                      <span className="text-[10px] text-slate-400">
+                      <span className="text-[11px] text-slate-300 font-medium mt-0.5 block">
                         {isLoginWall ? "Free shipping over ₹499" : "Taxes, delivery, platform"}
                       </span>
                     </div>
 
                     {/* Optional Selected Add-ons */}
-                    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 shadow-lg">
-                      <div className="flex items-center justify-between text-slate-400 mb-1">
+                    <div className="rounded-xl border border-white/12 bg-[#0c101d]/95 backdrop-blur-2xl p-4 sm:p-5 shadow-2xl">
+                      <div className="flex items-center justify-between text-slate-300 mb-1.5">
                         <span className="text-[11px] font-semibold uppercase tracking-wider">Optional Selected</span>
-                        <SlidersHorizontal className="h-3.5 w-3.5 text-slate-500" />
+                        <SlidersHorizontal className="h-3.5 w-3.5 text-slate-400" />
                       </div>
                       <div className="text-xl sm:text-2xl font-bold text-white">
                         {isLoginWall ? (
                           "₹0"
                         ) : summary.final_displayed_total === null && result.status === "inconclusive" ? (
-                          <span className="text-slate-500 text-lg sm:text-xl">Unverified</span>
+                          <span className="text-slate-400 text-lg sm:text-xl">Unverified</span>
                         ) : (
                           `${currency}${summary.optional_selected_charges_total.toLocaleString()}`
                         )}
                       </div>
-                      <span className="text-[10px] text-slate-400">
+                      <span className="text-[11px] text-slate-300 font-medium mt-0.5 block">
                         {isLoginWall ? "Zero auto-checked add-ons" : "Pre-ticked add-ons"}
                       </span>
                     </div>
 
                     {/* Net Price Difference */}
-                    <div className="col-span-2 lg:col-span-1 rounded-xl border border-white/10 bg-white/[0.03] p-4 shadow-lg">
-                      <div className="flex items-center justify-between text-slate-400 mb-1">
+                    <div className="col-span-2 lg:col-span-1 rounded-xl border border-white/12 bg-[#0c101d]/95 backdrop-blur-2xl p-4 sm:p-5 shadow-2xl">
+                      <div className="flex items-center justify-between text-slate-300 mb-1.5">
                         <span className="text-[11px] font-semibold uppercase tracking-wider">Net Difference</span>
-                        <TrendingUp className="h-3.5 w-3.5 text-slate-500" />
+                        <TrendingUp className="h-3.5 w-3.5 text-slate-400" />
                       </div>
                       <div
                         className={`text-xl sm:text-2xl font-bold ${
                           isLoginWall
                             ? "text-emerald-400"
                             : summary.final_displayed_total === null && result.status === "inconclusive"
-                            ? "text-slate-500"
+                            ? "text-slate-400"
                             : (summary.price_difference ?? 0) > 0
                             ? "text-rose-400"
                             : "text-emerald-400"
@@ -1031,7 +1039,7 @@ export default function App() {
                           `${currency}0`
                         )}
                       </div>
-                      <span className="text-[10px] text-slate-400">
+                      <span className="text-[11px] text-slate-300 font-medium mt-0.5 block">
                         {isLoginWall
                           ? "Transparent catalog pricing"
                           : summary.final_displayed_total === null && result.status === "inconclusive"
@@ -1046,18 +1054,18 @@ export default function App() {
 
                 {/* Itemized Charge Breakdown Table */}
                 {pricing && pricing.charges && pricing.charges.length > 0 && (
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6 shadow-xl">
+                  <div className="rounded-2xl border border-white/12 bg-[#0c101d]/95 backdrop-blur-2xl p-5 sm:p-6 shadow-2xl">
                     <div className="flex items-center justify-between mb-4">
                       <div>
                         <h3 className="text-base font-bold text-white flex items-center gap-2">
                           <Receipt className="h-4 w-4 text-blue-400" />
                           <span>Itemized Checkout Fee Breakdown</span>
                         </h3>
-                        <p className="text-xs text-slate-400">
+                        <p className="text-xs text-slate-300">
                           Line items, surcharges, and add-ons verified by TinyFish web agent during guest checkout.
                         </p>
                       </div>
-                      <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-xs font-semibold text-slate-300">
+                      <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-xs font-semibold text-slate-200">
                         {pricing.charges.length} line items
                       </span>
                     </div>
@@ -1065,7 +1073,7 @@ export default function App() {
                     <div className="overflow-x-auto">
                       <table className="w-full text-left text-xs">
                         <thead>
-                          <tr className="border-b border-white/[0.08] text-slate-400 uppercase tracking-wider text-[10px]">
+                          <tr className="border-b border-white/[0.12] text-slate-300 uppercase tracking-wider text-[10px]">
                             <th className="py-2.5 pr-4">Line Item Description</th>
                             <th className="py-2.5 px-4">Amount</th>
                             <th className="py-2.5 px-4">Type</th>
@@ -1073,9 +1081,9 @@ export default function App() {
                             <th className="py-2.5 pl-4">Evidence Quote</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/[0.06] text-slate-300">
+                        <tbody className="divide-y divide-white/[0.08] text-slate-200">
                           {pricing.charges.map((charge, idx) => (
-                            <tr key={idx} className="hover:bg-white/[0.02] transition">
+                            <tr key={idx} className="hover:bg-white/[0.05] transition">
                               <td className="py-3 pr-4 font-semibold text-white">{charge.label}</td>
                               <td className="py-3 px-4 font-bold text-white">
                                 {currency}
@@ -1091,7 +1099,7 @@ export default function App() {
                                     Optional Add-on
                                   </span>
                                 ) : (
-                                  <span className="inline-flex rounded bg-white/10 px-2 py-0.5 font-medium text-slate-400">
+                                  <span className="inline-flex rounded bg-white/10 px-2 py-0.5 font-medium text-slate-300">
                                     Fee
                                   </span>
                                 )}
@@ -1103,10 +1111,10 @@ export default function App() {
                                     <span>Pre-ticked</span>
                                   </span>
                                 ) : (
-                                  <span className="text-slate-500">No</span>
+                                  <span className="text-slate-400">No</span>
                                 )}
                               </td>
-                              <td className="py-3 pl-4 text-slate-400 italic max-w-xs truncate">
+                              <td className="py-3 pl-4 text-slate-300 italic max-w-xs truncate">
                                 "{charge.evidence || "Observed on checkout screen"}"
                               </td>
                             </tr>
@@ -1118,13 +1126,13 @@ export default function App() {
                 )}
 
                 {/* Evidence-Based Findings & Pattern Analysis */}
-                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6 shadow-xl">
+                <div className="rounded-2xl border border-white/12 bg-[#0c101d]/95 backdrop-blur-2xl p-5 sm:p-6 shadow-2xl">
                   <div className="mb-4">
                     <h3 className="text-base font-bold text-white flex items-center gap-2">
                       <AlertTriangle className="h-4 w-4 text-blue-400" />
                       <span>Evidence-Based Findings & Pattern Analysis</span>
                     </h3>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-slate-300">
                       Findings identified through deterministic pricing rules and DOM inspection evidence.
                     </p>
                   </div>
@@ -1137,16 +1145,16 @@ export default function App() {
                       return (
                         <div
                           key={finding.id}
-                          className={`rounded-xl border p-4 text-xs transition ${
+                          className={`rounded-xl border p-4 text-xs transition shadow-md ${
                             isWallFinding
-                              ? "border-blue-500/30 bg-blue-950/20"
+                              ? "border-blue-500/40 bg-[#070e1f]/95"
                               : finding.severity === "potential_concern"
-                              ? "border-rose-500/30 bg-rose-950/20"
+                              ? "border-rose-500/40 bg-[#1f0910]/95"
                               : finding.severity === "needs_review"
-                              ? "border-amber-500/30 bg-amber-950/20"
+                              ? "border-amber-500/40 bg-[#1c1204]/95"
                               : finding.severity === "inconclusive"
-                              ? "border-amber-500/30 bg-amber-950/20"
-                              : "border-white/10 bg-white/[0.02]"
+                              ? "border-amber-500/40 bg-[#1c1204]/95"
+                              : "border-white/12 bg-[#070a14]/95"
                           }`}
                         >
                           <div className="flex items-center justify-between gap-2 mb-1.5">
@@ -1172,28 +1180,28 @@ export default function App() {
                                   : finding.title}
                               </span>
                             </div>
-                            <span className="text-[11px] text-slate-400 capitalize">
+                            <span className="text-[11px] text-slate-300 capitalize">
                               Confidence: {finding.confidence}
                             </span>
                           </div>
 
-                          <p className="text-slate-300 leading-relaxed mb-2.5">
+                          <p className="text-slate-200 leading-relaxed mb-2.5">
                             {isWallFinding
                               ? `${merchantName} adheres to direct pricing standards: prices include all taxes with zero surprise convenience charges. Standard delivery is free for orders ₹499+ or Prime.`
                               : finding.explanation}
                           </p>
 
                           {finding.evidence && (
-                            <div className="rounded bg-black/50 border border-white/10 p-2 text-slate-300 mb-2 font-mono text-[11px]">
-                              <span className="font-sans font-semibold text-slate-200">Observed Evidence:</span>{" "}
+                            <div className="rounded-lg bg-black/60 border border-white/15 p-2.5 text-slate-200 mb-2 font-mono text-[11px]">
+                              <span className="font-sans font-semibold text-slate-100">Observed Evidence:</span>{" "}
                               {isWallFinding
                                 ? `100% GST inclusive catalog price · ₹0 payment surcharge · Free shipping on qualifying cart thresholds`
                                 : finding.evidence}
                             </div>
                           )}
 
-                          <div className="text-slate-300 font-medium flex items-center gap-1.5 text-[11px]">
-                            <span className="text-blue-400">→ Recommended Action:</span>
+                          <div className="text-slate-200 font-medium flex items-center gap-1.5 text-[11px]">
+                            <span className="text-blue-400 font-bold">→ Recommended Action:</span>
                             <span>
                               {isWallFinding
                                 ? `Safe to purchase directly on ${merchantName}. Ensure your cart total exceeds ₹499 or use Prime to avoid standard delivery fee.`
@@ -1208,7 +1216,7 @@ export default function App() {
 
                 {/* Helpful Tip for Guest Checkout Audits */}
                 {isLoginWall && (
-                  <div className="rounded-xl border border-blue-500/30 bg-blue-950/30 p-4 flex items-start gap-3">
+                  <div className="rounded-xl border border-blue-500/40 bg-[#0b1329]/95 backdrop-blur-2xl p-4 flex items-start gap-3 shadow-lg">
                     <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400 shrink-0">
                       <ShoppingBag className="h-4 w-4" />
                     </div>
@@ -1216,7 +1224,7 @@ export default function App() {
                       <span className="font-bold text-white block mb-0.5">
                         💡 Want to test TinySleuth's live AI agent uncovering real drip fees?
                       </span>
-                      <p className="text-slate-300 leading-relaxed">
+                      <p className="text-slate-200 leading-relaxed">
                         Try stores with <strong>Guest Checkout</strong> (Shopify apparel & electronics stores, flight & hotel booking platforms, food delivery) where hidden convenience surcharges and pre-checked protection add-ons appear dynamically in checkout!
                       </p>
                     </div>
@@ -1260,32 +1268,32 @@ export default function App() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-xl hover:border-white/20 transition">
+            <div className="rounded-2xl border border-white/12 bg-[#0c101d]/95 backdrop-blur-2xl p-6 shadow-2xl hover:border-white/25 transition">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/20 text-blue-400 mb-4">
                 <Search className="h-5 w-5" />
               </div>
               <h3 className="text-base font-bold text-white">1. Inspect</h3>
-              <p className="mt-2 text-xs sm:text-sm text-slate-400 leading-relaxed">
+              <p className="mt-2 text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
                 TinyFish autonomous web agent navigates the real merchant page as a guest without touching payment details or submitting orders.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-xl hover:border-white/20 transition">
+            <div className="rounded-2xl border border-white/12 bg-[#0c101d]/95 backdrop-blur-2xl p-6 shadow-2xl hover:border-white/25 transition">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-400 mb-4">
                 <SlidersHorizontal className="h-5 w-5" />
               </div>
               <h3 className="text-base font-bold text-white">2. Compare</h3>
-              <p className="mt-2 text-xs sm:text-sm text-slate-400 leading-relaxed">
+              <p className="mt-2 text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
                 Calculates mathematical discrepancies between initially advertised sticker prices and final checkout screens down to the penny.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-xl hover:border-white/20 transition">
+            <div className="rounded-2xl border border-white/12 bg-[#0c101d]/95 backdrop-blur-2xl p-6 shadow-2xl hover:border-white/25 transition">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/20 text-purple-400 mb-4">
                 <ShieldCheck className="h-5 w-5" />
               </div>
               <h3 className="text-base font-bold text-white">3. Understand</h3>
-              <p className="mt-2 text-xs sm:text-sm text-slate-400 leading-relaxed">
+              <p className="mt-2 text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
                 Identifies surprise convenience fees, pre-ticked add-ons, and dark patterns with quoted evidence and actionable guidance.
               </p>
             </div>
@@ -1293,14 +1301,14 @@ export default function App() {
         </section>
 
         {/* 8. Fair by Design & Safety Guardrails */}
-        <section id="fair-by-design" className="mt-16 rounded-3xl border border-white/10 bg-white/[0.03] p-8 sm:p-10 shadow-2xl">
+        <section id="fair-by-design" className="mt-16 rounded-3xl border border-white/12 bg-[#0c101d]/95 backdrop-blur-2xl p-8 sm:p-10 shadow-2xl">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-blue-300 mb-4">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-blue-300 mb-4 border border-white/10">
               <Lock className="h-3.5 w-3.5" />
               <span>Consumer Privacy & Safety Standard</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white">Strict Consumer Safety Protocols</h2>
-            <p className="mt-3 text-sm text-slate-400 leading-relaxed">
+            <p className="mt-3 text-sm text-slate-200 leading-relaxed font-normal">
               TinySleuth is designed strictly as a consumer advocacy auditor. The agent operates strictly in read-only guest inspection mode:
               it halts immediately if personal passwords, SMS OTPs, or payment card credentials are required. No financial accounts are ever accessed or compromised.
             </p>
