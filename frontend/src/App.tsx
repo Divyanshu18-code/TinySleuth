@@ -457,22 +457,22 @@ export default function App() {
       </div>
 
       {/* 1. Header Navigation — Frosted Capsule Pills (Exact match to reference video) */}
-      <header className="relative z-50 pt-5 sm:pt-7 px-4 sm:px-8 max-w-7xl mx-auto flex items-center justify-between">
+      <header className="relative z-50 pt-4 sm:pt-7 px-4 sm:px-8 max-w-7xl mx-auto flex items-center justify-between">
         {/* Brand Capsule Pill */}
         <div
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="dark-glass-pill px-4 sm:px-5 py-2.5 flex items-center gap-2.5 cursor-pointer hover:border-white/30 transition shadow-lg"
+          className="dark-glass-pill px-3.5 sm:px-5 py-2 sm:py-2.5 flex items-center gap-2 sm:gap-2.5 cursor-pointer hover:border-white/30 transition shadow-lg shrink-0"
         >
           <img
             src={heroMascotImg}
             alt="TinySleuth Logo"
-            className="h-6 w-6 rounded-lg object-contain shadow-sm"
+            className="h-5 w-5 sm:h-6 sm:w-6 rounded-lg object-contain shadow-sm"
           />
-          <span className="text-sm font-bold text-white tracking-tight">TinySleuth</span>
+          <span className="text-xs sm:text-sm font-bold text-white tracking-tight">TinySleuth</span>
         </div>
 
-        {/* Navigation Links (Matches user's exact specification: Home, Why us, How it works) */}
-        <nav className="flex items-center gap-6 sm:gap-10 text-xs sm:text-sm font-medium">
+        {/* Navigation Links (Hidden on mobile to avoid overcrowding and horizontal overflow) */}
+        <nav className="hidden md:flex items-center gap-6 sm:gap-10 text-xs sm:text-sm font-medium">
           <a
             href="#"
             onClick={(e) => {
@@ -498,13 +498,13 @@ export default function App() {
         </nav>
 
         {/* Right CTA Capsule Pill (Get Started ↗) */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={() => {
               inputRef.current?.focus();
               inputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
             }}
-            className="dark-glass-pill px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-medium text-slate-200 hover:text-white flex items-center gap-1.5 shadow-lg group"
+            className="dark-glass-pill px-3.5 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-slate-200 hover:text-white flex items-center gap-1.5 shadow-lg group"
           >
             <span>Get Started</span>
             <span className="text-slate-400 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition">
@@ -515,18 +515,19 @@ export default function App() {
       </header>
 
       {/* 2. Hero Section with ColorBends Running in Background */}
-      <main className="relative z-10 mx-auto max-w-7xl px-4 sm:px-8 pt-6 sm:pt-12 pb-16">
-        <div className="relative min-h-[580px] lg:min-h-[640px] flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-8">
+      <main className="relative z-10 mx-auto max-w-7xl px-4 sm:px-8 pt-4 sm:pt-12 pb-16">
+        <div className="relative min-h-[520px] lg:min-h-[640px] flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-8">
           {/* Foreground Content: All Text and Objects Floating Over ColorBends Background */}
-          <div className="relative z-10 max-w-2xl lg:max-w-xl xl:max-w-2xl space-y-6 flex-1">
+          <div className="relative z-10 max-w-2xl lg:max-w-xl xl:max-w-2xl space-y-5 sm:space-y-6 flex-1 text-center sm:text-left">
             {/* Kicker with Glowing Emerald Dot */}
-            <div className="inline-flex items-center gap-2 text-xs font-semibold text-slate-300 tracking-wide bg-white/[0.05] backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10 shadow-lg">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
-              <span>AI Infrastructure for Truth · Autonomous Checkout Auditor</span>
+            <div className="inline-flex items-center gap-2 text-[11px] sm:text-xs font-semibold text-slate-300 tracking-wide bg-white/[0.05] backdrop-blur-md px-3 sm:px-3.5 py-1.5 rounded-full border border-white/10 shadow-lg max-w-full">
+              <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse shrink-0" />
+              <span className="hidden sm:inline">AI Infrastructure for Truth · Autonomous Checkout Auditor</span>
+              <span className="sm:hidden truncate">AI Truth Infrastructure · Checkout Auditor</span>
             </div>
 
             {/* Display Headline (Space Grotesk Tech Display) Floating Over 3D Background */}
-            <h1 className="text-4xl sm:text-6xl lg:text-[72px] font-black text-white tracking-tight leading-[1.03] drop-shadow-[0_10px_35px_rgba(0,0,0,0.85)]">
+            <h1 className="text-3xl sm:text-5xl lg:text-[70px] font-black text-white tracking-tight leading-[1.08] sm:leading-[1.03] break-words drop-shadow-[0_10px_35px_rgba(0,0,0,0.85)]">
               Inspect, Expose &<br />
               Audit Truth with<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400">
@@ -535,13 +536,13 @@ export default function App() {
             </h1>
 
             {/* Subtitle Floating Over 3D Background */}
-            <p className="text-sm sm:text-base text-slate-300 font-normal leading-relaxed max-w-xl drop-shadow-[0_4px_12px_rgba(0,0,0,0.7)]">
+            <p className="text-xs sm:text-base text-slate-300 font-normal leading-relaxed max-w-xl drop-shadow-[0_4px_12px_rgba(0,0,0,0.7)] mx-auto sm:mx-0">
               Our advanced AI engine inspects e-commerce checkouts in real time, uncovers hidden mandatory fees and
               pre-ticked add-ons, and gives you transparent truth before you pay.
             </p>
 
             {/* High-End Dark Frosted Glass URL Input Bar — Floating over 3D background */}
-            <div className="rounded-2xl border border-white/15 bg-black/65 p-2 backdrop-blur-2xl shadow-2xl focus-within:border-white/30 focus-within:ring-2 focus-within:ring-blue-500/25 transition-all max-w-xl">
+            <div className="rounded-2xl border border-white/15 bg-black/65 p-2 backdrop-blur-2xl shadow-2xl focus-within:border-white/30 focus-within:ring-2 focus-within:ring-blue-500/25 transition-all max-w-xl mx-auto sm:mx-0">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -596,7 +597,7 @@ export default function App() {
 
             {/* Instant Mode Notice for Amazon / Flipkart */}
             {isAmazonOrFlipkart && (
-              <div className="flex items-start gap-2.5 rounded-xl bg-blue-950/60 backdrop-blur-xl border border-blue-500/30 p-3 text-xs text-blue-200 max-w-xl shadow-lg">
+              <div className="flex items-start gap-2.5 rounded-xl bg-blue-950/60 backdrop-blur-xl border border-blue-500/30 p-3 text-xs text-blue-200 max-w-xl text-left shadow-lg mx-auto sm:mx-0">
                 <ShieldCheck className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
                 <div>
                   <strong>⚡ Instant Safety Audit:</strong> This merchant mandates user account login before displaying checkout totals. TinySleuth evaluates this in &lt;1 second under our zero-credential consumer safety guardrails.
@@ -608,7 +609,7 @@ export default function App() {
             {(url.toLowerCase().includes("google.com/search") ||
               url.toLowerCase().includes("google.com/shopping") ||
               url.toLowerCase().includes("bing.com")) && (
-              <div className="flex items-start gap-2.5 rounded-xl bg-amber-950/60 backdrop-blur-xl border border-amber-500/30 p-3 text-xs text-amber-200 max-w-xl shadow-lg">
+              <div className="flex items-start gap-2.5 rounded-xl bg-amber-950/60 backdrop-blur-xl border border-amber-500/30 p-3 text-xs text-amber-200 max-w-xl text-left shadow-lg mx-auto sm:mx-0">
                 <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
                 <div>
                   <strong>Notice:</strong> You pasted a search aggregator link. Search engines block automated browsers with reCAPTCHA. Please paste the direct store URL (e.g. <em>Amazon</em>, <em>Croma</em>, <em>Flipkart</em>) for a successful checkout audit.
@@ -618,7 +619,7 @@ export default function App() {
 
             {/* Error Message Alert */}
             {error && (
-              <div className="flex items-start gap-3 rounded-xl border border-red-500/40 bg-red-950/60 backdrop-blur-xl p-4 text-xs text-red-200 max-w-xl shadow-lg">
+              <div className="flex items-start gap-3 rounded-xl border border-red-500/40 bg-red-950/60 backdrop-blur-xl p-4 text-xs text-red-200 max-w-xl text-left shadow-lg mx-auto sm:mx-0">
                 <AlertTriangle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
                 <div className="flex-1">
                   <span className="font-semibold text-red-300">Audit Request Error:</span> {error}
@@ -627,12 +628,12 @@ export default function App() {
             )}
 
             {/* Demo Evaluator Buttons — Floating Frosted Pills */}
-            <div className="pt-1 flex flex-col sm:flex-row items-start sm:items-center gap-2.5 text-xs max-w-xl">
+            <div className="pt-1 flex flex-col sm:flex-row items-center sm:items-center gap-2.5 text-xs max-w-xl mx-auto sm:mx-0">
               <span className="text-slate-400 font-medium flex items-center gap-1.5 shrink-0">
                 <Info className="h-3.5 w-3.5 text-slate-500" />
                 <span>Demo evaluations:</span>
               </span>
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                 {DEMO_SCENARIOS.map((scenario) => (
                   <button
                     key={scenario.name}
@@ -651,19 +652,19 @@ export default function App() {
             </div>
 
             {/* Strict Safety Guardrail Note */}
-            <div className="flex items-center gap-2 text-[11px] text-slate-400 max-w-xl pt-1">
+            <div className="flex items-center justify-center sm:justify-start gap-2 text-[11px] text-slate-400 max-w-xl pt-1 mx-auto sm:mx-0">
               <Lock className="h-3 w-3 text-slate-500 shrink-0" />
               <span>Strict consumer safety guardrails: Never submits card details or places orders.</span>
             </div>
           </div>
 
           {/* Right Hero Mascot & AI Truth Inspector Showcase */}
-          <div className="relative z-10 flex-1 flex flex-col items-center justify-center w-full max-w-md lg:max-w-none pt-6 lg:pt-0">
+          <div className="relative z-10 flex-1 flex flex-col items-center justify-center w-full max-w-md lg:max-w-none pt-4 lg:pt-0">
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 0.7, ease: "easeOut" }}
-              className="relative flex flex-col items-center justify-center"
+              className="relative flex flex-col items-center justify-center w-full"
             >
               {/* Vibrant Ambient Glow Behind Mascot */}
               <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/40 via-indigo-500/35 to-purple-500/30 rounded-full blur-[80px] transform scale-110 pointer-events-none" />
@@ -684,43 +685,44 @@ export default function App() {
                 <img
                   src={heroMascotImg}
                   alt="TinySleuth AI Truth Auditor Mascot"
-                  className="w-72 h-72 sm:w-96 sm:h-96 lg:w-[420px] lg:h-[420px] xl:w-[460px] xl:h-[460px] object-contain drop-shadow-[0_30px_60px_rgba(99,102,241,0.5)] drop-shadow-[0_15px_30px_rgba(0,0,0,0.9)] transition-transform duration-500 group-hover:scale-105"
+                  className="w-56 h-56 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[420px] lg:h-[420px] xl:w-[460px] xl:h-[460px] object-contain drop-shadow-[0_30px_60px_rgba(99,102,241,0.5)] drop-shadow-[0_15px_30px_rgba(0,0,0,0.9)] transition-transform duration-500 group-hover:scale-105"
                 />
 
                 {/* Floating Glass Badge under Mascot */}
-                <div className="mt-4 inline-flex items-center gap-2.5 px-4 sm:px-5 py-2.5 rounded-full bg-[#0c101d]/90 backdrop-blur-2xl border border-white/20 text-xs sm:text-sm font-semibold text-white shadow-2xl hover:border-white/30 transition">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-                  <span>TinySleuth · Autonomous Checkout Truth Auditor</span>
+                <div className="mt-3 sm:mt-4 inline-flex items-center gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full bg-[#0c101d]/90 backdrop-blur-2xl border border-white/20 text-xs sm:text-sm font-semibold text-white shadow-2xl hover:border-white/30 transition text-center max-w-[90vw]">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)] shrink-0" />
+                  <span className="hidden sm:inline">TinySleuth · Autonomous Checkout Truth Auditor</span>
+                  <span className="sm:hidden text-xs truncate">TinySleuth · Truth Auditor</span>
                 </div>
               </motion.div>
             </motion.div>
           </div>
         </div>
 
-        {/* 3. Bottom 3-Counter Stats Row (Floating in Foreground) */}
-        <section className="relative z-10 mt-16 sm:mt-24 p-6 sm:p-7 rounded-2xl border border-white/10 bg-[#0c101d]/85 backdrop-blur-2xl shadow-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-16 w-full max-w-3xl">
+        {/* 3. Bottom 3-Counter Stats Row (Responsive 3-col on mobile & desktop) */}
+        <section className="relative z-10 mt-10 sm:mt-24 p-5 sm:p-7 rounded-2xl border border-white/10 bg-[#0c101d]/85 backdrop-blur-2xl shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-8">
+          <div className="grid grid-cols-3 gap-2 sm:gap-16 w-full max-w-3xl text-center sm:text-left">
             {/* Stat 1 */}
             <div>
-              <div className="text-2xl sm:text-3xl font-black text-white tracking-tight">₹14.2L+</div>
-              <div className="text-[10px] sm:text-[11px] font-semibold text-slate-300 uppercase tracking-widest mt-1">
-                Total Surcharges Exposed
+              <div className="text-lg sm:text-2xl md:text-3xl font-black text-white tracking-tight">₹14.2L+</div>
+              <div className="text-[9px] sm:text-[11px] font-semibold text-slate-300 uppercase tracking-tight sm:tracking-widest mt-0.5 sm:mt-1 leading-tight">
+                Surcharges Exposed
               </div>
             </div>
 
             {/* Stat 2 */}
             <div>
-              <div className="text-2xl sm:text-3xl font-black text-white tracking-tight">99.8%</div>
-              <div className="text-[10px] sm:text-[11px] font-semibold text-slate-300 uppercase tracking-widest mt-1">
+              <div className="text-lg sm:text-2xl md:text-3xl font-black text-white tracking-tight">99.8%</div>
+              <div className="text-[9px] sm:text-[11px] font-semibold text-slate-300 uppercase tracking-tight sm:tracking-widest mt-0.5 sm:mt-1 leading-tight">
                 Detection Accuracy
               </div>
             </div>
 
             {/* Stat 3 */}
             <div>
-              <div className="text-2xl sm:text-3xl font-black text-white tracking-tight">&lt; 2.4s</div>
-              <div className="text-[10px] sm:text-[11px] font-semibold text-slate-300 uppercase tracking-widest mt-1">
-                AI Audit Engine
+              <div className="text-lg sm:text-2xl md:text-3xl font-black text-white tracking-tight">&lt; 2.4s</div>
+              <div className="text-[9px] sm:text-[11px] font-semibold text-slate-300 uppercase tracking-tight sm:tracking-widest mt-0.5 sm:mt-1 leading-tight">
+                Audit Speed
               </div>
             </div>
           </div>
@@ -1411,7 +1413,7 @@ export default function App() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-sm sm:max-w-md rounded-3xl border border-white/15 bg-[#0d101e] p-6 sm:p-7 shadow-2xl text-center"
+              className="relative w-full max-w-sm sm:max-w-md max-h-[90vh] overflow-y-auto rounded-3xl border border-white/15 bg-[#0d101e] p-5 sm:p-7 shadow-2xl text-center"
             >
               {/* Close Button */}
               <button
