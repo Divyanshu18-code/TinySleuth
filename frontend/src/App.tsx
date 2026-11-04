@@ -1365,7 +1365,18 @@ export default function App() {
             <span className="font-bold text-white">TinySleuth</span>
             <span>— AI-Powered Checkout Price Transparency Auditor</span>
           </div>
-          <div className="flex items-center gap-4 text-slate-400">
+          <div className="flex flex-wrap items-center gap-4 text-slate-400">
+            {/* Support this project (Razorpay) */}
+            <a
+              href="https://razorpay.me/@varsharaj"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-rose-500/15 via-purple-500/15 to-indigo-500/15 border border-rose-500/30 text-rose-300 hover:text-white hover:border-rose-400 hover:bg-rose-500/25 transition shadow-sm group font-medium text-xs"
+            >
+              <span>Support this project 🥀</span>
+              <ExternalLink className="h-3 w-3 text-rose-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition" />
+            </a>
+
             <a
               href="https://github.com/Divyanshu18-code/TinySleuth"
               target="_blank"
@@ -1375,6 +1386,7 @@ export default function App() {
               <span>GitHub</span>
               <ExternalLink className="h-3 w-3 text-slate-500" />
             </a>
+            <span className="hidden sm:inline">·</span>
             <span>Powered by TinyFish AI Web Agent</span>
           </div>
         </div>
