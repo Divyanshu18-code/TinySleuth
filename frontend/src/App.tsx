@@ -650,41 +650,39 @@ export default function App() {
           </div>
 
           {/* Right Hero Mascot & AI Truth Inspector Showcase */}
-          <div className="relative z-10 flex-1 flex flex-col items-center justify-center w-full max-w-md lg:max-w-none pt-4 lg:pt-0">
+          <div className="relative z-10 flex-1 flex flex-col items-center justify-center w-full max-w-md lg:max-w-none pt-6 lg:pt-0">
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 0.7, ease: "easeOut" }}
-              className="relative flex items-center justify-center"
+              className="relative flex flex-col items-center justify-center"
             >
               {/* Vibrant Ambient Glow Behind Mascot */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/35 via-indigo-500/30 to-purple-500/25 rounded-[44px] blur-3xl transform scale-110 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/40 via-indigo-500/35 to-purple-500/30 rounded-full blur-[80px] transform scale-110 pointer-events-none" />
 
-              {/* Floating Frosted Glass Presentation Card */}
+              {/* Floating Mascot Logo — Enlarged & Pure Transparent */}
               <motion.div
                 animate={{
-                  y: [-8, 8, -8],
-                  rotate: [-0.5, 0.5, -0.5],
+                  y: [-10, 10, -10],
+                  rotate: [-1, 1, -1],
                 }}
                 transition={{
                   duration: 5,
                   repeat: Infinity,
                   ease: "easeInOut",
                 }}
-                className="relative rounded-[40px] p-3 sm:p-4 bg-[#0d1124]/85 backdrop-blur-2xl border border-white/15 shadow-[0_30px_70px_-15px_rgba(79,70,229,0.35)] group"
+                className="relative flex flex-col items-center group cursor-pointer"
               >
-                <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-indigo-950/60 to-purple-950/60 p-2 sm:p-4">
-                  <img
-                    src={heroMascotImg}
-                    alt="TinySleuth AI Truth Auditor Mascot"
-                    className="w-64 h-64 sm:w-80 sm:h-80 lg:w-[360px] lg:h-[360px] object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.6)] transition-transform duration-500 group-hover:scale-105"
-                  />
+                <img
+                  src={heroMascotImg}
+                  alt="TinySleuth AI Truth Auditor Mascot"
+                  className="w-72 h-72 sm:w-96 sm:h-96 lg:w-[420px] lg:h-[420px] xl:w-[460px] xl:h-[460px] object-contain drop-shadow-[0_30px_60px_rgba(99,102,241,0.5)] drop-shadow-[0_15px_30px_rgba(0,0,0,0.9)] transition-transform duration-500 group-hover:scale-105"
+                />
 
-                  {/* Floating Glass Badge over Mascot */}
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap inline-flex items-center gap-2 px-4 py-2 rounded-full bg-black/80 backdrop-blur-xl border border-white/20 text-xs font-semibold text-white shadow-2xl">
-                    <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-                    <span>TinySleuth · AI Checkout Truth Auditor</span>
-                  </div>
+                {/* Floating Glass Badge under Mascot */}
+                <div className="mt-4 inline-flex items-center gap-2.5 px-4 sm:px-5 py-2.5 rounded-full bg-[#0c101d]/90 backdrop-blur-2xl border border-white/20 text-xs sm:text-sm font-semibold text-white shadow-2xl hover:border-white/30 transition">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                  <span>TinySleuth · Autonomous Checkout Truth Auditor</span>
                 </div>
               </motion.div>
             </motion.div>
