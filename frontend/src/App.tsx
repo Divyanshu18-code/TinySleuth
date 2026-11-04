@@ -1366,12 +1366,14 @@ export default function App() {
             <span>— AI-Powered Checkout Price Transparency Auditor</span>
           </div>
           <div className="flex flex-wrap items-center gap-4 text-slate-400">
-            {/* Support this project (Razorpay) */}
+            {/* Support this project */}
             <a
-              href="https://razorpay.me/@varsharaj"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-rose-500/15 via-purple-500/15 to-indigo-500/15 border border-rose-500/30 text-rose-300 hover:text-white hover:border-rose-400 hover:bg-rose-500/25 transition shadow-sm group font-medium text-xs"
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                alert("Payment link updating soon!");
+              }}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-rose-500/15 via-purple-500/15 to-indigo-500/15 border border-rose-500/30 text-rose-300 hover:text-white hover:border-rose-400 hover:bg-rose-500/25 transition shadow-sm group font-medium text-xs cursor-pointer"
             >
               <span>Support this project 🥀</span>
               <ExternalLink className="h-3 w-3 text-rose-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition" />
