@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: tinysleuth-backend
+    env: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: TINYFISH_BASE_URL
+        value: https://agent.tinyfish.ai
+      - key: FRONTEND_ORIGIN
+        value: http://localhost:5173
+      - key: TINYFISH_API_KEY
+        sync: false

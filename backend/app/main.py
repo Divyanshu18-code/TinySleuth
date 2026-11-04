@@ -12,16 +12,24 @@ app = FastAPI(
     description="Evidence-based pricing inspection engine powered by TinyFish AI Web Agent.",
 )
 
-# Secure CORS configuration
-origins = [
-    settings.frontend_origin,
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
+# Flexible & secure CORS configuration for production and local environments
+configured_origins = [o.strip() for o in settings.frontend_origin.split(",") if o.strip()]
+origins = list(
+    set(
+        [
+            *configured_origins,
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://localhost:3000",
+            "http://localhost:8000",
+        ]
+    )
+)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex=r"https://.*\.vercel\.app|https://.*\.onrender\.com|https://.*\.netlify\.app|http://localhost:.*",
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
