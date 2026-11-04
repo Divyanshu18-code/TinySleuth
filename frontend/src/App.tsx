@@ -257,6 +257,8 @@ export default function App() {
   const [showRawJson, setShowRawJson] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isDemoData, setIsDemoData] = useState(false);
+  const [showSupportModal, setShowSupportModal] = useState(false);
+  const [upiCopied, setUpiCopied] = useState(false);
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const timerRef = useRef<number | null>(null);
@@ -369,6 +371,12 @@ export default function App() {
     navigator.clipboard.writeText(JSON.stringify(result, null, 2));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const copyUpiId = () => {
+    navigator.clipboard.writeText("divyanshu390@ptyes");
+    setUpiCopied(true);
+    setTimeout(() => setUpiCopied(false), 2500);
   };
 
   const pricing = result?.extracted_pricing;
@@ -1367,17 +1375,14 @@ export default function App() {
           </div>
           <div className="flex flex-wrap items-center gap-4 text-slate-400">
             {/* Support this project */}
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                alert("Payment link updating soon!");
-              }}
+            <button
+              type="button"
+              onClick={() => setShowSupportModal(true)}
               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-rose-500/15 via-purple-500/15 to-indigo-500/15 border border-rose-500/30 text-rose-300 hover:text-white hover:border-rose-400 hover:bg-rose-500/25 transition shadow-sm group font-medium text-xs cursor-pointer"
             >
               <span>Support this project 🥀</span>
-              <ExternalLink className="h-3 w-3 text-rose-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition" />
-            </a>
+              <span className="text-rose-400 group-hover:scale-110 transition">↗</span>
+            </button>
 
             <a
               href="https://github.com/Divyanshu18-code/TinySleuth"
@@ -1393,6 +1398,87 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* Support Project UPI Modal */}
+      <AnimatePresence>
+        {showSupportModal && (
+          <div
+            onClick={() => setShowSupportModal(false)}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-sm sm:max-w-md rounded-3xl border border-white/15 bg-[#0d101e] p-6 sm:p-7 shadow-2xl text-center"
+            >
+              {/* Close Button */}
+              <button
+                type="button"
+                onClick={() => setShowSupportModal(false)}
+                className="absolute top-4 right-4 p-2 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition"
+                aria-label="Close"
+              >
+                <span className="text-xl leading-none">✕</span>
+              </button>
+
+              {/* Header Icon */}
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-rose-500/20 via-purple-500/20 to-blue-500/20 border border-rose-500/30 text-2xl shadow-lg mb-3">
+                🥀
+              </div>
+
+              <h3 className="text-xl font-bold text-white">Support TinySleuth</h3>
+              <p className="mt-1 text-xs text-slate-300 leading-relaxed max-w-xs mx-auto">
+                Help keep our autonomous pricing truth engine independent, free, and open for consumers.
+              </p>
+
+              {/* Dynamic QR Code Card */}
+              <div className="mt-5 p-4 rounded-2xl bg-white/[0.04] border border-white/10 flex flex-col items-center shadow-inner">
+                <div className="p-3 bg-white rounded-2xl shadow-2xl">
+                  <img
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi%3A%2F%2Fpay%3Fpa%3Ddivyanshu390%40ptyes%26pn%3DDivyanshu%26tn%3DSupport%20TinySleuth%20Project%26cu%3DINR"
+                    alt="Scan UPI QR Code to pay Divyanshu"
+                    className="w-40 h-40 object-contain rounded-lg"
+                  />
+                </div>
+                <span className="mt-2.5 text-[11px] text-slate-300 font-medium">
+                  Scan with Google Pay, PhonePe, Paytm or BHIM
+                </span>
+              </div>
+
+              {/* Verified UPI ID Copy Row */}
+              <div className="mt-4 flex items-center justify-between gap-2 p-3 rounded-xl bg-black/60 border border-white/15">
+                <div className="text-left">
+                  <div className="text-[10px] text-slate-400 uppercase font-semibold">Paytm UPI ID</div>
+                  <div className="text-sm font-mono font-bold text-white select-all">divyanshu390@ptyes</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={copyUpiId}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition active:scale-95"
+                >
+                  {upiCopied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                  <span>{upiCopied ? "Copied!" : "Copy"}</span>
+                </button>
+              </div>
+
+              {/* Pay via UPI App Intent Button (Mobile) */}
+              <a
+                href="upi://pay?pa=divyanshu390@ptyes&pn=Divyanshu&tn=Support%20TinySleuth%20Project&cu=INR"
+                className="mt-4 w-full py-3 px-4 rounded-xl bg-gradient-to-r from-rose-500 via-purple-600 to-blue-600 text-white font-bold text-sm flex items-center justify-center gap-2 hover:opacity-95 transition shadow-lg shadow-purple-600/30"
+              >
+                <span>Pay via any UPI App</span>
+                <ExternalLink className="h-4 w-4" />
+              </a>
+
+              <div className="mt-3 text-[10px] text-slate-400">
+                100% of payments go directly to Divyanshu's verified bank account via Paytm / Yes Bank.
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
