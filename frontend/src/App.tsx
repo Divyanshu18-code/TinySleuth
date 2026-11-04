@@ -489,8 +489,8 @@ export default function App() {
           <span className="text-xs sm:text-sm font-bold text-white tracking-tight">TinySleuth</span>
         </div>
 
-        {/* Navigation Links (Hidden on mobile to avoid overcrowding and horizontal overflow) */}
-        <nav className="hidden md:flex items-center gap-6 sm:gap-10 text-xs sm:text-sm font-medium">
+        {/* Navigation Links (Accessible on both mobile & desktop) */}
+        <nav className="flex items-center gap-2.5 sm:gap-6 md:gap-10 text-[11px] sm:text-xs md:text-sm font-medium">
           <a
             href="#"
             onClick={(e) => {
@@ -502,13 +502,21 @@ export default function App() {
             Home
           </a>
           <a
-            href="#fair-by-design"
+            href="#why-us"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById("why-us")?.scrollIntoView({ behavior: "smooth" });
+            }}
             className="text-slate-300 hover:text-white transition cursor-pointer"
           >
             Why us
           </a>
           <a
-            href="#features"
+            href="#how-it-works"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
+            }}
             className="text-slate-300 hover:text-white transition cursor-pointer"
           >
             How it works
@@ -669,6 +677,33 @@ export default function App() {
               </div>
             </div>
 
+            {/* Quick 3-Step Instruction Guide for First-Time Users */}
+            <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-3.5 max-w-xl text-left mx-auto sm:mx-0 shadow-xl">
+              <div className="flex items-center justify-between gap-2 text-xs font-bold text-white mb-2">
+                <span className="flex items-center gap-1.5 text-blue-300">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500/20 text-blue-400 text-[11px] font-bold">💡</span>
+                  <span>How to Use TinySleuth (Quick Guide):</span>
+                </span>
+                <span className="text-[10px] uppercase font-semibold text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                  Instant & Free
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] text-slate-300 leading-snug">
+                <div className="flex items-start gap-2 p-2 rounded-xl bg-white/[0.03] border border-white/5">
+                  <span className="font-bold text-blue-400 shrink-0">1.</span>
+                  <span><strong>Copy URL</strong> from any store, airline, or Shopify cart.</span>
+                </div>
+                <div className="flex items-start gap-2 p-2 rounded-xl bg-white/[0.03] border border-white/5">
+                  <span className="font-bold text-indigo-400 shrink-0">2.</span>
+                  <span><strong>Paste & Audit</strong> (or tap a Demo scenario above).</span>
+                </div>
+                <div className="flex items-start gap-2 p-2 rounded-xl bg-white/[0.03] border border-white/5">
+                  <span className="font-bold text-purple-400 shrink-0">3.</span>
+                  <span><strong>See Truth</strong>: uncover drip fees & sneaky add-ons!</span>
+                </div>
+              </div>
+            </div>
+
             {/* Strict Safety Guardrail Note */}
             <div className="flex items-center justify-center sm:justify-start gap-2 text-[11px] text-slate-400 max-w-xl pt-1 mx-auto sm:mx-0">
               <Lock className="h-3 w-3 text-slate-500 shrink-0" />
@@ -748,7 +783,7 @@ export default function App() {
           {/* Scroll Down Indicator (Bottom Right) */}
           <div
             onClick={() => {
-              const el = document.getElementById("features");
+              const el = document.getElementById("how-it-works");
               el?.scrollIntoView({ behavior: "smooth" });
             }}
             className="hidden sm:flex items-center gap-1.5 text-xs text-slate-300 hover:text-white transition cursor-pointer shrink-0"
@@ -1330,58 +1365,214 @@ export default function App() {
           </AnimatePresence>
         </div>
 
-        {/* 7. Feature Pillars Section */}
-        <section id="features" className="mt-24 pt-12 border-t border-white/[0.08]">
-          <div className="text-center max-w-2xl mx-auto mb-10">
-            <span className="text-xs font-bold uppercase tracking-wider text-blue-400">Core Capabilities</span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white mt-1">Autonomous Pricing Inspection</h2>
+        {/* 7. How It Works Section — Comprehensive 4-Step Instructions */}
+        <section id="how-it-works" className="mt-20 sm:mt-28 pt-12 border-t border-white/[0.08]">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <span className="text-xs font-bold uppercase tracking-wider text-blue-400 bg-blue-500/10 border border-blue-500/20 px-3 py-1 rounded-full">
+              Step-by-Step Instructions
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-white mt-3 tracking-tight">
+              How TinySleuth Works
+            </h2>
+            <p className="mt-2.5 text-xs sm:text-sm text-slate-300 leading-relaxed">
+              Inspect any checkout in 4 simple steps without sharing personal logins or payment details.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div className="rounded-2xl border border-white/12 bg-[#0c101d]/95 backdrop-blur-2xl p-6 shadow-2xl hover:border-white/25 transition">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/20 text-blue-400 mb-4">
-                <Search className="h-5 w-5" />
+          {/* 4 Interactive Step Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {/* Step 1 */}
+            <div className="rounded-2xl border border-white/12 bg-[#0c101d]/90 backdrop-blur-2xl p-6 shadow-2xl hover:border-blue-500/40 transition group relative overflow-hidden">
+              <div className="absolute top-4 right-4 text-xs font-black text-slate-600 group-hover:text-blue-400/40 transition">
+                01
               </div>
-              <h3 className="text-base font-bold text-white">1. Inspect</h3>
-              <p className="mt-2 text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
-                TinyFish autonomous web agent navigates the real merchant page as a guest without touching payment details or submitting orders.
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/20 text-blue-400 mb-4 group-hover:scale-110 transition shadow-lg shadow-blue-500/10">
+                <Search className="h-6 w-6" />
+              </div>
+              <div className="text-[11px] font-bold uppercase text-blue-400 tracking-wider mb-1">Step 1</div>
+              <h3 className="text-base font-bold text-white mb-2">Copy Store URL</h3>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Copy the link of any product, hotel room, or flight ticket from Flipkart, Amazon, Myntra, or independent Shopify stores.
               </p>
+              <div className="mt-4 pt-3 border-t border-white/10 text-[11px] text-slate-400 font-mono">
+                e.g. flight or checkout URL
+              </div>
             </div>
 
-            <div className="rounded-2xl border border-white/12 bg-[#0c101d]/95 backdrop-blur-2xl p-6 shadow-2xl hover:border-white/25 transition">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-400 mb-4">
-                <SlidersHorizontal className="h-5 w-5" />
+            {/* Step 2 */}
+            <div className="rounded-2xl border border-white/12 bg-[#0c101d]/90 backdrop-blur-2xl p-6 shadow-2xl hover:border-indigo-500/40 transition group relative overflow-hidden">
+              <div className="absolute top-4 right-4 text-xs font-black text-slate-600 group-hover:text-indigo-400/40 transition">
+                02
               </div>
-              <h3 className="text-base font-bold text-white">2. Compare</h3>
-              <p className="mt-2 text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
-                Calculates mathematical discrepancies between initially advertised sticker prices and final checkout screens down to the penny.
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-500/20 text-indigo-400 mb-4 group-hover:scale-110 transition shadow-lg shadow-indigo-500/10">
+                <SlidersHorizontal className="h-6 w-6" />
+              </div>
+              <div className="text-[11px] font-bold uppercase text-indigo-400 tracking-wider mb-1">Step 2</div>
+              <h3 className="text-base font-bold text-white mb-2">Paste & Audit</h3>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Paste the URL into the search bar at the top, or tap any of our verified <strong>Demo Scenarios</strong> to test instant evaluations.
               </p>
+              <div className="mt-4 pt-3 border-t border-white/10 text-[11px] text-indigo-300 font-medium">
+                ⚡ 1-Click instant test
+              </div>
             </div>
 
-            <div className="rounded-2xl border border-white/12 bg-[#0c101d]/95 backdrop-blur-2xl p-6 shadow-2xl hover:border-white/25 transition">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/20 text-purple-400 mb-4">
-                <ShieldCheck className="h-5 w-5" />
+            {/* Step 3 */}
+            <div className="rounded-2xl border border-white/12 bg-[#0c101d]/90 backdrop-blur-2xl p-6 shadow-2xl hover:border-purple-500/40 transition group relative overflow-hidden">
+              <div className="absolute top-4 right-4 text-xs font-black text-slate-600 group-hover:text-purple-400/40 transition">
+                03
               </div>
-              <h3 className="text-base font-bold text-white">3. Understand</h3>
-              <p className="mt-2 text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
-                Identifies surprise convenience fees, pre-ticked add-ons, and dark patterns with quoted evidence and actionable guidance.
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-500/20 text-purple-400 mb-4 group-hover:scale-110 transition shadow-lg shadow-purple-500/10">
+                <RefreshCw className="h-6 w-6" />
+              </div>
+              <div className="text-[11px] font-bold uppercase text-purple-400 tracking-wider mb-1">Step 3</div>
+              <h3 className="text-base font-bold text-white mb-2">AI Agent Inspects</h3>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Our autonomous web agent navigates the real merchant page as a guest to inspect the true final checkout total before payment.
               </p>
+              <div className="mt-4 pt-3 border-t border-white/10 text-[11px] text-purple-300 font-medium">
+                🛡️ Read-only guest audit
+              </div>
             </div>
+
+            {/* Step 4 */}
+            <div className="rounded-2xl border border-white/12 bg-[#0c101d]/90 backdrop-blur-2xl p-6 shadow-2xl hover:border-emerald-500/40 transition group relative overflow-hidden">
+              <div className="absolute top-4 right-4 text-xs font-black text-slate-600 group-hover:text-emerald-400/40 transition">
+                04
+              </div>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-400 mb-4 group-hover:scale-110 transition shadow-lg shadow-emerald-500/10">
+                <CheckCircle2 className="h-6 w-6" />
+              </div>
+              <div className="text-[11px] font-bold uppercase text-emerald-400 tracking-wider mb-1">Step 4</div>
+              <h3 className="text-base font-bold text-white mb-2">Expose Truth</h3>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                See mathematical comparison between advertised base price vs checkout total. Uncover hidden convenience fees and pre-ticked add-ons!
+              </p>
+              <div className="mt-4 pt-3 border-t border-white/10 text-[11px] text-emerald-300 font-medium">
+                💰 Save 15% – 35% on orders
+              </div>
+            </div>
+          </div>
+
+          {/* Quick CTA button to try auditing */}
+          <div className="mt-8 text-center">
+            <button
+              type="button"
+              onClick={() => {
+                inputRef.current?.focus();
+                inputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+              }}
+              className="inline-flex items-center gap-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 px-6 py-2.5 text-xs sm:text-sm font-bold text-white transition active:scale-95 shadow-lg cursor-pointer"
+            >
+              <span>Try Auditing a Product Now</span>
+              <span>↑</span>
+            </button>
           </div>
         </section>
 
-        {/* 8. Fair by Design & Safety Guardrails */}
-        <section id="fair-by-design" className="mt-16 rounded-3xl border border-white/12 bg-[#0c101d]/95 backdrop-blur-2xl p-8 sm:p-10 shadow-2xl">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-blue-300 mb-4 border border-white/10">
-              <Lock className="h-3.5 w-3.5" />
-              <span>Consumer Privacy & Safety Standard</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white">Strict Consumer Safety Protocols</h2>
-            <p className="mt-3 text-sm text-slate-200 leading-relaxed font-normal">
-              TinySleuth is designed strictly as a consumer advocacy auditor. The agent operates strictly in read-only guest inspection mode:
-              it halts immediately if personal passwords, SMS OTPs, or payment card credentials are required. No financial accounts are ever accessed or compromised.
+        {/* 8. Why Us Section — Consumer Advocacy & Dark Pattern Defense */}
+        <section id="why-us" className="mt-20 sm:mt-28 pt-12 border-t border-white/[0.08]">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
+              Consumer Advocacy · 100% Free
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-white mt-3 tracking-tight">
+              Why Choose TinySleuth?
+            </h2>
+            <p className="mt-2.5 text-xs sm:text-sm text-slate-300 leading-relaxed">
+              Online merchants quietly extract thousands of crores each year through psychological checkout traps. Here is why TinySleuth protects you:
             </p>
+          </div>
+
+          {/* 4 Core Pillars */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Pillar 1 */}
+            <div className="rounded-3xl border border-white/12 bg-[#0c101d]/95 backdrop-blur-2xl p-7 shadow-2xl flex items-start gap-4 hover:border-white/25 transition">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-500/20 text-rose-400 shrink-0">
+                <AlertTriangle className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-white">Expose Hidden "Drip Pricing" Surcharges</h3>
+                <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
+                  Stores frequently advertise an artificially low sticker price on Google Search or catalog pages to earn your click, then quietly add ₹150–₹500 in surprise "convenience fees", "handling fees", or "mandatory platform surcharges" right before payment. TinySleuth reveals these fees before you start checkout.
+                </p>
+              </div>
+            </div>
+
+            {/* Pillar 2 */}
+            <div className="rounded-3xl border border-white/12 bg-[#0c101d]/95 backdrop-blur-2xl p-7 shadow-2xl flex items-start gap-4 hover:border-white/25 transition">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/20 text-amber-400 shrink-0">
+                <Receipt className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-white">Catch Pre-Selected Add-on Checkbox Traps</h3>
+                <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
+                  Websites frequently pre-check boxes for optional ₹99–₹299 travel insurance, charity roundups, or express priority handling without your explicit opt-in. TinySleuth spots every auto-selected item and quotes the exact evidence so you can uncheck it and keep your money.
+                </p>
+              </div>
+            </div>
+
+            {/* Pillar 3 */}
+            <div className="rounded-3xl border border-white/12 bg-[#0c101d]/95 backdrop-blur-2xl p-7 shadow-2xl flex items-start gap-4 hover:border-white/25 transition">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/20 text-blue-400 shrink-0">
+                <Lock className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-white">Strict Zero-Credential Consumer Privacy</h3>
+                <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
+                  TinySleuth operates solely in read-only guest inspection mode. We NEVER ask for, record, or compromise your personal passwords, phone SMS OTPs, or payment card numbers. The agent halts safely if an account login is mandated, safeguarding your privacy 100%.
+                </p>
+              </div>
+            </div>
+
+            {/* Pillar 4 */}
+            <div className="rounded-3xl border border-white/12 bg-[#0c101d]/95 backdrop-blur-2xl p-7 shadow-2xl flex items-start gap-4 hover:border-white/25 transition">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-400 shrink-0">
+                <ShieldCheck className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-white">100% Free & Independent Consumer Advocate</h3>
+                <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
+                  We are not owned by retailers, we do not accept affiliate kickbacks, and we never manipulate audit scores for sponsors. TinySleuth is built as an open, independent truth engine to help ordinary consumers shop with transparent confidence.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Side-by-Side Comparison Box */}
+          <div className="mt-8 rounded-3xl border border-white/15 bg-[#090b17]/95 p-6 sm:p-8 backdrop-blur-2xl shadow-2xl">
+            <h4 className="text-base sm:text-lg font-bold text-white text-center mb-6">
+              Traditional E-Commerce vs With TinySleuth
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Bad side */}
+              <div className="rounded-2xl border border-rose-500/30 bg-rose-950/20 p-5">
+                <div className="text-rose-400 font-bold text-sm mb-3 flex items-center gap-2">
+                  <span>❌</span>
+                  <span>Ordinary Online Shopping</span>
+                </div>
+                <ul className="space-y-2 text-xs text-rose-200/80 leading-relaxed">
+                  <li>• Final total is revealed only after filling long delivery & payment forms.</li>
+                  <li>• Sneaky pre-checked checkboxes for insurance and handling fees.</li>
+                  <li>• Advertised prices exclude taxes and mandatory checkout surcharges.</li>
+                  <li>• Consumers end up paying 15% – 35% more than initially expected.</li>
+                </ul>
+              </div>
+
+              {/* Good side */}
+              <div className="rounded-2xl border border-emerald-500/30 bg-emerald-950/20 p-5">
+                <div className="text-emerald-400 font-bold text-sm mb-3 flex items-center gap-2">
+                  <span>✅</span>
+                  <span>With TinySleuth Truth Auditor</span>
+                </div>
+                <ul className="space-y-2 text-xs text-emerald-200/90 leading-relaxed">
+                  <li>• See the true final price in seconds before starting checkout.</li>
+                  <li>• All pre-selected add-ons flagged with exact evidence quotes.</li>
+                  <li>• Mathematical breakdown of sticker price vs mandatory fees.</li>
+                  <li>• Completely free, unbiased, and safe with zero passwords or OTPs required.</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </section>
       </main>
