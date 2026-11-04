@@ -259,7 +259,6 @@ export default function App() {
   const [isDemoData, setIsDemoData] = useState(false);
   const [showSupportModal, setShowSupportModal] = useState(false);
   const [upiCopied, setUpiCopied] = useState(false);
-  const [supportAmount, setSupportAmount] = useState<string>("25");
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const timerRef = useRef<number | null>(null);
@@ -380,22 +379,12 @@ export default function App() {
     setTimeout(() => setUpiCopied(false), 2500);
   };
 
-  const numSupportAmount = parseInt(supportAmount, 10);
-  const validSupportAmount = !isNaN(numSupportAmount) && numSupportAmount > 0 ? numSupportAmount.toString() : "";
-  const upiPayUrl = `upi://pay?pa=divyanshu390@ptyes&pn=Divyanshu${validSupportAmount ? `&am=${validSupportAmount}` : ""}&tn=Support%20TinySleuth%20Project&cu=INR`;
+  const upiPayUrl = "upi://pay?pa=divyanshu390@ptyes&pn=Divyanshu&tn=Support%20TinySleuth%20Project&cu=INR";
   const upiQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiPayUrl)}`;
 
-  const gpayIntent = `intent://pay?pa=divyanshu390@ptyes&pn=Divyanshu${validSupportAmount ? `&am=${validSupportAmount}` : ""}&tn=Support%20TinySleuth%20Project&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa;end`;
-  const phonepeIntent = `intent://pay?pa=divyanshu390@ptyes&pn=Divyanshu${validSupportAmount ? `&am=${validSupportAmount}` : ""}&tn=Support%20TinySleuth%20Project&cu=INR#Intent;scheme=upi;package=com.phonepe.app;end`;
-  const paytmIntent = `intent://pay?pa=divyanshu390@ptyes&pn=Divyanshu${validSupportAmount ? `&am=${validSupportAmount}` : ""}&tn=Support%20TinySleuth%20Project&cu=INR#Intent;scheme=upi;package=net.one97.paytm;end`;
-
-  const handlePayViaApp = (targetUrl: string) => {
-    // Automatically copy UPI ID to clipboard as instant safety fallback
-    navigator.clipboard.writeText("divyanshu390@ptyes");
-    setUpiCopied(true);
-    setTimeout(() => setUpiCopied(false), 3000);
-    window.location.href = targetUrl;
-  };
+  const gpayIntent = "intent://pay?pa=divyanshu390@ptyes&pn=Divyanshu&tn=Support%20TinySleuth%20Project&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa;end";
+  const phonepeIntent = "intent://pay?pa=divyanshu390@ptyes&pn=Divyanshu&tn=Support%20TinySleuth%20Project&cu=INR#Intent;scheme=upi;package=com.phonepe.app;end";
+  const paytmIntent = "intent://pay?pa=divyanshu390@ptyes&pn=Divyanshu&tn=Support%20TinySleuth%20Project&cu=INR#Intent;scheme=upi;package=net.one97.paytm;end";
 
   const pricing = result?.extracted_pricing;
   const summary = result?.pricing_summary;
@@ -1644,64 +1633,25 @@ export default function App() {
                 Help keep our autonomous pricing truth engine independent, free, and open for consumers.
               </p>
 
-              {/* Amount Selection (Starts from ₹1) */}
-              <div className="mt-4 p-3 rounded-2xl bg-white/[0.04] border border-white/10 text-center">
-                <div className="text-[11px] font-semibold text-slate-300 mb-2 flex items-center justify-between px-1">
-                  <span>Choose Contribution Amount:</span>
-                  <span className="text-emerald-400 font-mono font-bold">₹{validSupportAmount || "0"}</span>
-                </div>
-                <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                  {["1", "10", "25", "50", "100", "500"].map((amt) => (
-                    <button
-                      key={amt}
-                      type="button"
-                      onClick={() => setSupportAmount(amt)}
-                      className={`px-3 py-1 rounded-full text-xs font-bold transition ${
-                        supportAmount === amt
-                          ? "bg-gradient-to-r from-rose-500 to-purple-600 text-white shadow-md shadow-purple-500/30 scale-105"
-                          : "bg-white/10 text-slate-300 hover:bg-white/20 hover:text-white"
-                      }`}
-                    >
-                      ₹{amt}
-                    </button>
-                  ))}
-                </div>
-                <div className="mt-2.5 flex items-center justify-center gap-2 pt-1 border-t border-white/10">
-                  <span className="text-[11px] text-slate-400">Custom Amount (₹1+):</span>
-                  <div className="relative flex items-center">
-                    <span className="absolute left-2.5 text-xs text-slate-400 font-bold">₹</span>
-                    <input
-                      type="number"
-                      min="1"
-                      step="1"
-                      placeholder="Any amount"
-                      value={supportAmount}
-                      onChange={(e) => setSupportAmount(e.target.value.replace(/[^0-9]/g, ""))}
-                      className="w-28 bg-black/60 border border-white/20 rounded-lg pl-6 pr-2.5 py-1 text-xs text-white font-bold text-center focus:outline-none focus:border-purple-400"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Dynamic QR Code Card (Auto-updates with selected amount) */}
-              <div className="mt-4 p-4 rounded-2xl bg-white/[0.04] border border-white/10 flex flex-col items-center shadow-inner">
+              {/* Dynamic QR Code Card (Open amount: user enters any amount of their choice) */}
+              <div className="mt-5 p-4 rounded-2xl bg-white/[0.04] border border-white/10 flex flex-col items-center shadow-inner">
                 <div className="p-3 bg-white rounded-2xl shadow-2xl">
                   <img
                     src={upiQrUrl}
-                    alt={`Scan UPI QR Code to pay ₹${validSupportAmount || "any"} to Divyanshu`}
+                    alt="Scan UPI QR Code to pay Divyanshu"
                     className="w-40 h-40 object-contain rounded-lg"
                   />
                 </div>
                 <div className="mt-2 text-xs font-bold text-white">
-                  Scan to pay {validSupportAmount ? `₹${validSupportAmount}` : "any amount"}
+                  Enter any amount of your choice
                 </div>
                 <span className="text-[10px] text-slate-400 mt-0.5">
-                  Scan with Google Pay, PhonePe, Paytm or BHIM (100% Works)
+                  Scan with Google Pay, PhonePe, Paytm or BHIM
                 </span>
               </div>
 
               {/* Verified UPI ID Copy Row */}
-              <div className="mt-3 flex items-center justify-between gap-2 p-3 rounded-xl bg-black/60 border border-white/15">
+              <div className="mt-3.5 flex items-center justify-between gap-2 p-3 rounded-xl bg-black/60 border border-white/15">
                 <div className="text-left">
                   <div className="text-[10px] text-slate-400 uppercase font-semibold">Paytm UPI ID</div>
                   <div className="text-sm font-mono font-bold text-white select-all">divyanshu390@ptyes</div>
@@ -1716,52 +1666,40 @@ export default function App() {
                 </button>
               </div>
 
-              {/* Pay via UPI App Intent Button (Mobile & Desktop with auto-copy fallback) */}
-              <button
-                type="button"
-                onClick={() => handlePayViaApp(upiPayUrl)}
-                className="mt-3 w-full py-3 px-4 rounded-xl bg-gradient-to-r from-rose-500 via-purple-600 to-blue-600 text-white font-bold text-sm flex items-center justify-center gap-2 hover:opacity-95 transition shadow-lg shadow-purple-600/30 active:scale-95 cursor-pointer"
+              {/* Pay via UPI App Button (Opens directly without auto-copying) */}
+              <a
+                href={upiPayUrl}
+                className="mt-3.5 w-full py-3 px-4 rounded-xl bg-gradient-to-r from-rose-500 via-purple-600 to-blue-600 text-white font-bold text-sm flex items-center justify-center gap-2 hover:opacity-95 transition shadow-lg shadow-purple-600/30 active:scale-95 cursor-pointer"
               >
-                <span>Pay ₹{validSupportAmount || "1+"} via UPI App</span>
+                <span>Pay via any UPI App</span>
                 <ExternalLink className="h-4 w-4" />
-              </button>
+              </a>
 
-              {/* Direct 1-Tap App Shortcuts for Mobile Users */}
-              <div className="mt-2.5 flex items-center justify-center gap-2 flex-wrap text-[11px]">
-                <button
-                  type="button"
-                  onClick={() => handlePayViaApp(phonepeIntent)}
-                  className="px-2.5 py-1 rounded-lg bg-purple-950/60 border border-purple-500/30 text-purple-200 hover:bg-purple-900/60 transition"
+              {/* Direct 1-Tap App Shortcuts for Mobile (Direct links, no auto-copy) */}
+              <div className="mt-2.5 flex items-center justify-center gap-2 flex-wrap text-xs">
+                <a
+                  href={phonepeIntent}
+                  className="px-3 py-1.5 rounded-lg bg-purple-950/60 border border-purple-500/30 text-purple-200 hover:bg-purple-900/60 transition font-medium"
                 >
                   PhonePe
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handlePayViaApp(gpayIntent)}
-                  className="px-2.5 py-1 rounded-lg bg-blue-950/60 border border-blue-500/30 text-blue-200 hover:bg-blue-900/60 transition"
+                </a>
+                <a
+                  href={gpayIntent}
+                  className="px-3 py-1.5 rounded-lg bg-blue-950/60 border border-blue-500/30 text-blue-200 hover:bg-blue-900/60 transition font-medium"
                 >
                   Google Pay
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handlePayViaApp(paytmIntent)}
-                  className="px-2.5 py-1 rounded-lg bg-sky-950/60 border border-sky-500/30 text-sky-200 hover:bg-sky-900/60 transition"
+                </a>
+                <a
+                  href={paytmIntent}
+                  className="px-3 py-1.5 rounded-lg bg-sky-950/60 border border-sky-500/30 text-sky-200 hover:bg-sky-900/60 transition font-medium"
                 >
                   Paytm
-                </button>
+                </a>
               </div>
 
-              {/* Informative Note */}
+              {/* Footer Note */}
               <div className="mt-3 text-[10px] text-slate-400 leading-normal">
-                {upiCopied ? (
-                  <span className="text-emerald-400 font-semibold">
-                    ✓ UPI ID (divyanshu390@ptyes) clipboard me copy ho gaya hai! Kisi bhi app me paste karke direct bhejein.
-                  </span>
-                ) : (
-                  <span>
-                    💡 <strong>Tip:</strong> Phone scanner se scan karne par bina kisi browser restriction ke ₹1 se kitna bhi transfer ho jata hai.
-                  </span>
-                )}
+                100% of contributions go directly to Divyanshu's verified bank account via Paytm / Yes Bank.
               </div>
             </motion.div>
           </div>
