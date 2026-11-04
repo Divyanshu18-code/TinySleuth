@@ -16,3 +16,4 @@ services:
         value: http://localhost:5173
       - key: TINYFISH_API_KEY
         sync: false
+
