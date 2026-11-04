@@ -63,8 +63,11 @@ export interface AuditResponse {
   raw_diagnostics?: Record<string, unknown> | null;
 }
 
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
+
 export async function startAudit(url: string, signal?: AbortSignal): Promise<AuditResponse> {
-  const res = await fetch("/api/audit", {
+  const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/audit` : "/api/audit";
+  const res = await fetch(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ url }),
