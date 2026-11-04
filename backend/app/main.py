@@ -35,6 +35,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Root health check endpoint for Render/cloud pings (supports both GET and HEAD)
+@app.get("/")
+@app.head("/")
+async def root_health():
+    return {
+        "status": "ok",
+        "app": "TinySleuth",
+        "service": "checkout_truth_auditor",
+        "version": "1.0.0",
+    }
+
+
 # Support both /api/* and root /* endpoints
 app.include_router(router, prefix="/api", tags=["API"])
 app.include_router(router, tags=["Root"])
+
+
+if __name__ == "__main__":
+    import os
+    import uvicorn
+
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port)
