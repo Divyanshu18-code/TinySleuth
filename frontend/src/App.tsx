@@ -402,6 +402,28 @@ export default function App() {
         theme: {
           color: "#6366f1",
         },
+        config: {
+          display: {
+            blocks: {
+              upi: {
+                name: "Pay via UPI (Google Pay, PhonePe, Paytm)",
+                instruments: [{ method: "upi" }],
+              },
+              other: {
+                name: "Other Payment Modes",
+                instruments: [
+                  { method: "card" },
+                  { method: "netbanking" },
+                  { method: "wallet" },
+                ],
+              },
+            },
+            sequence: ["block.upi", "block.other"],
+            preferences: {
+              show_default_blocks: true,
+            },
+          },
+        },
         modal: {
           ondismiss: () => {
             setRazorpayLoading(false);
