@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     tinyfish_base_url: str = "https://agent.tinyfish.ai"
     tinyfish_timeout_seconds: int = 90
     frontend_origin: str = "http://localhost:5173"
+    razorpay_key_id: str = "rzp_test_TwvmDrOXL3J4Cb"
+    razorpay_key_secret: str = "OvrykCWkQ49AKqEn9nrRqjXv"
 
 
 def get_settings() -> Settings:

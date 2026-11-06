@@ -3,10 +3,18 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException
 
 from app.core.security import clean_tracking_url, detect_login_walled_merchant, extract_title_from_url_slug, validate_target_url
-from app.models.schemas import AuditRequest, AuditResponse, ExtractedPricing
+from app.models.schemas import (
+    AuditRequest,
+    AuditResponse,
+    CreateOrderRequest,
+    CreateOrderResponse,
+    ExtractedPricing,
+    VerifyPaymentRequest,
+)
 from app.services.detection_service import generate_findings
 from app.services.parser import parse_pricing
 from app.services.pricing_service import calculate_pricing_summary
+from app.services.razorpay_service import create_razorpay_order, verify_payment_signature
 from app.services.tinyfish_client import TinyFishError, run_audit
 
 router = APIRouter()
@@ -140,3 +148,31 @@ async def audit(req: AuditRequest):
         message=pricing.blocked_reason,
         raw_diagnostics={"run_id": run.run_id, "status": run.status},
     )
+
+
+@router.post("/payment/create-order", response_model=CreateOrderResponse)
+async def create_payment_order(req: CreateOrderRequest):
+    """Create a verified Razorpay checkout order for project contribution."""
+    try:
+        order = await create_razorpay_order(req.amount)
+        return CreateOrderResponse(**order)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@router.post("/payment/verify")
+async def verify_payment(req: VerifyPaymentRequest):
+    """Verify Razorpay payment signature after successful checkout."""
+    is_valid = verify_payment_signature(
+        order_id=req.razorpay_order_id,
+        payment_id=req.razorpay_payment_id,
+        signature=req.razorpay_signature,
+    )
+    if not is_valid:
+        raise HTTPException(status_code=400, detail="Invalid Razorpay payment signature.")
+    return {
+        "status": "success",
+        "message": "Payment verified successfully! Thank you for supporting TinySleuth.",
+        "payment_id": req.razorpay_payment_id,
+    }
+

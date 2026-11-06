@@ -79,3 +79,43 @@ export async function startAudit(url: string, signal?: AbortSignal): Promise<Aud
   }
   return res.json();
 }
+
+export interface CreateOrderResponse {
+  order_id: string;
+  amount: number;
+  currency: string;
+  key_id: string;
+}
+
+export async function createPaymentOrder(amount: number): Promise<CreateOrderResponse> {
+  const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/payment/create-order` : "/api/payment/create-order";
+  const res = await fetch(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ amount }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail ?? `Failed to create payment order (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function verifyPayment(paymentData: {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}): Promise<{ status: string; message: string; payment_id: string }> {
+  const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/payment/verify` : "/api/payment/verify";
+  const res = await fetch(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(paymentData),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail ?? `Payment verification failed (${res.status})`);
+  }
+  return res.json();
+}
+

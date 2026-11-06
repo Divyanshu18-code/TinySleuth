@@ -18,8 +18,9 @@ import {
   ExternalLink,
   ChevronDown,
   ArrowRight,
+  CreditCard,
 } from "lucide-react";
-import { startAudit, type AuditResponse } from "./api";
+import { startAudit, createPaymentOrder, verifyPayment, type AuditResponse } from "./api";
 import ColorBends from "./components/ColorBends";
 import heroMascotImg from "./assets/hero-mascot.png";
 
@@ -259,6 +260,10 @@ export default function App() {
   const [isDemoData, setIsDemoData] = useState(false);
   const [showSupportModal, setShowSupportModal] = useState(false);
   const [upiCopied, setUpiCopied] = useState(false);
+  const [razorpayLoading, setRazorpayLoading] = useState(false);
+  const [razorpayAmount, setRazorpayAmount] = useState<string>("50");
+  const [paymentSuccess, setPaymentSuccess] = useState<string | null>(null);
+  const [activePaymentTab, setActivePaymentTab] = useState<"razorpay" | "upi">("razorpay");
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const timerRef = useRef<number | null>(null);
@@ -385,6 +390,61 @@ export default function App() {
   const gpayIntent = "intent://pay?pa=divyanshu390@ptyes&pn=Divyanshu&tn=Support%20TinySleuth%20Project&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa;end";
   const phonepeIntent = "intent://pay?pa=divyanshu390@ptyes&pn=Divyanshu&tn=Support%20TinySleuth%20Project&cu=INR#Intent;scheme=upi;package=com.phonepe.app;end";
   const paytmIntent = "intent://pay?pa=divyanshu390@ptyes&pn=Divyanshu&tn=Support%20TinySleuth%20Project&cu=INR#Intent;scheme=upi;package=net.one97.paytm;end";
+
+  const handleRazorpayPayment = async () => {
+    const amt = parseFloat(razorpayAmount);
+    if (isNaN(amt) || amt < 1) {
+      alert("Please enter a valid amount (minimum ₹1).");
+      return;
+    }
+
+    setRazorpayLoading(true);
+    setPaymentSuccess(null);
+    try {
+      const orderData = await createPaymentOrder(amt);
+
+      if (!window.Razorpay) {
+        throw new Error("Razorpay Checkout SDK not loaded. Please refresh the page and try again.");
+      }
+
+      const options = {
+        key: orderData.key_id || "rzp_test_TwvmDrOXL3J4Cb",
+        amount: orderData.amount,
+        currency: orderData.currency || "INR",
+        name: "TinySleuth Project",
+        description: "Support Autonomous Truth Auditor",
+        order_id: orderData.order_id,
+        theme: {
+          color: "#6366f1",
+        },
+        modal: {
+          ondismiss: () => {
+            setRazorpayLoading(false);
+          },
+        },
+        handler: async (response: {
+          razorpay_order_id: string;
+          razorpay_payment_id: string;
+          razorpay_signature: string;
+        }) => {
+          try {
+            await verifyPayment(response);
+            setPaymentSuccess(response.razorpay_payment_id);
+          } catch (err: any) {
+            alert("Payment signature verification failed: " + (err.message || err));
+          } finally {
+            setRazorpayLoading(false);
+          }
+        },
+      };
+
+      const rzpInstance = new window.Razorpay(options);
+      rzpInstance.open();
+    } catch (err: any) {
+      alert("Failed to initiate Razorpay checkout: " + (err.message || err));
+      setRazorpayLoading(false);
+    }
+  };
 
   const pricing = result?.extracted_pricing;
   const summary = result?.pricing_summary;
@@ -1633,73 +1693,191 @@ export default function App() {
                 Help keep our autonomous pricing truth engine independent, free, and open for consumers.
               </p>
 
-              {/* Dynamic QR Code Card (Open amount: user enters any amount of their choice) */}
-              <div className="mt-5 p-4 rounded-2xl bg-white/[0.04] border border-white/10 flex flex-col items-center shadow-inner">
-                <div className="p-3 bg-white rounded-2xl shadow-2xl">
-                  <img
-                    src={upiQrUrl}
-                    alt="Scan UPI QR Code to pay Divyanshu"
-                    className="w-40 h-40 object-contain rounded-lg"
-                  />
-                </div>
-                <div className="mt-2 text-xs font-bold text-white">
-                  Enter any amount of your choice
-                </div>
-                <span className="text-[10px] text-slate-400 mt-0.5">
-                  Scan with Google Pay, PhonePe, Paytm or BHIM
-                </span>
-              </div>
-
-              {/* Verified UPI ID Copy Row */}
-              <div className="mt-3.5 flex items-center justify-between gap-2 p-3 rounded-xl bg-black/60 border border-white/15">
-                <div className="text-left">
-                  <div className="text-[10px] text-slate-400 uppercase font-semibold">Paytm UPI ID</div>
-                  <div className="text-sm font-mono font-bold text-white select-all">divyanshu390@ptyes</div>
-                </div>
+              {/* Payment Method Selector Tabs */}
+              <div className="mt-4 grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-black/60 border border-white/10">
                 <button
                   type="button"
-                  onClick={copyUpiId}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition active:scale-95"
+                  onClick={() => setActivePaymentTab("razorpay")}
+                  className={`py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                    activePaymentTab === "razorpay"
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-indigo-500/25"
+                      : "text-slate-400 hover:text-white hover:bg-white/5"
+                  }`}
                 >
-                  {upiCopied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-                  <span>{upiCopied ? "Copied!" : "Copy"}</span>
+                  <CreditCard className="h-3.5 w-3.5" />
+                  <span>Razorpay</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActivePaymentTab("upi")}
+                  className={`py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                    activePaymentTab === "upi"
+                      ? "bg-gradient-to-r from-rose-500 to-purple-600 text-white shadow-md shadow-purple-500/25"
+                      : "text-slate-400 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <span>Direct UPI QR</span>
                 </button>
               </div>
 
-              {/* Pay via UPI App Button (Opens directly without auto-copying) */}
-              <a
-                href={upiPayUrl}
-                className="mt-3.5 w-full py-3 px-4 rounded-xl bg-gradient-to-r from-rose-500 via-purple-600 to-blue-600 text-white font-bold text-sm flex items-center justify-center gap-2 hover:opacity-95 transition shadow-lg shadow-purple-600/30 active:scale-95 cursor-pointer"
-              >
-                <span>Pay via any UPI App</span>
-                <ExternalLink className="h-4 w-4" />
-              </a>
+              {/* TAB 1: Razorpay Official Checkout (Cards, NetBanking, UPI, Wallets) */}
+              {activePaymentTab === "razorpay" && (
+                <div className="mt-4 space-y-4">
+                  {/* Amount Selection */}
+                  <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 text-center">
+                    <div className="text-[11px] font-semibold text-slate-300 mb-2 flex items-center justify-between">
+                      <span>Choose Support Amount:</span>
+                      <span className="text-indigo-400 font-mono font-bold">₹{razorpayAmount || "0"}</span>
+                    </div>
 
-              {/* Direct 1-Tap App Shortcuts for Mobile (Direct links, no auto-copy) */}
-              <div className="mt-2.5 flex items-center justify-center gap-2 flex-wrap text-xs">
-                <a
-                  href={phonepeIntent}
-                  className="px-3 py-1.5 rounded-lg bg-purple-950/60 border border-purple-500/30 text-purple-200 hover:bg-purple-900/60 transition font-medium"
-                >
-                  PhonePe
-                </a>
-                <a
-                  href={gpayIntent}
-                  className="px-3 py-1.5 rounded-lg bg-blue-950/60 border border-blue-500/30 text-blue-200 hover:bg-blue-900/60 transition font-medium"
-                >
-                  Google Pay
-                </a>
-                <a
-                  href={paytmIntent}
-                  className="px-3 py-1.5 rounded-lg bg-sky-950/60 border border-sky-500/30 text-sky-200 hover:bg-sky-900/60 transition font-medium"
-                >
-                  Paytm
-                </a>
-              </div>
+                    {/* Quick Amount Chips */}
+                    <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                      {["25", "50", "100", "250", "500"].map((amt) => (
+                        <button
+                          key={amt}
+                          type="button"
+                          onClick={() => setRazorpayAmount(amt)}
+                          className={`px-3 py-1 rounded-full text-xs font-bold transition ${
+                            razorpayAmount === amt
+                              ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md shadow-indigo-500/30 scale-105"
+                              : "bg-white/10 text-slate-300 hover:bg-white/20 hover:text-white"
+                          }`}
+                        >
+                          ₹{amt}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Custom Amount Field */}
+                    <div className="mt-2.5 flex items-center justify-center gap-2 pt-2 border-t border-white/10">
+                      <span className="text-[11px] text-slate-400">Custom ₹:</span>
+                      <div className="relative flex items-center">
+                        <span className="absolute left-2.5 text-xs text-slate-400 font-bold">₹</span>
+                        <input
+                          type="number"
+                          min="1"
+                          step="1"
+                          placeholder="Amount"
+                          value={razorpayAmount}
+                          onChange={(e) => setRazorpayAmount(e.target.value.replace(/[^0-9]/g, ""))}
+                          className="w-28 bg-black/60 border border-white/20 rounded-lg pl-6 pr-2.5 py-1 text-xs text-white font-bold text-center focus:outline-none focus:border-indigo-400"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Payment Success Alert */}
+                  {paymentSuccess && (
+                    <div className="p-3 rounded-xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-200 text-xs">
+                      <div className="font-bold flex items-center justify-center gap-1.5 text-emerald-300 mb-0.5">
+                        <Check className="h-4 w-4" />
+                        <span>Payment Successful!</span>
+                      </div>
+                      <div className="text-[10px] text-emerald-400/90 font-mono">
+                        Payment ID: {paymentSuccess}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Razorpay Launch Action Button */}
+                  <button
+                    type="button"
+                    disabled={razorpayLoading}
+                    onClick={handleRazorpayPayment}
+                    className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white font-bold text-sm flex items-center justify-center gap-2 hover:opacity-95 transition shadow-lg shadow-indigo-600/30 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {razorpayLoading ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 animate-spin" />
+                        <span>Opening Razorpay...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="h-4 w-4" />
+                        <span>Pay ₹{razorpayAmount || "50"} with Razorpay</span>
+                      </>
+                    )}
+                  </button>
+
+                  <div className="text-[10px] text-slate-400 flex items-center justify-center gap-1.5">
+                    <ShieldCheck className="h-3.5 w-3.5 text-indigo-400" />
+                    <span>Supports Debit Cards, Credit Cards, NetBanking, UPI & Wallets</span>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 2: Direct Paytm UPI Setup (0% Gateway Fee) */}
+              {activePaymentTab === "upi" && (
+                <div className="mt-4 space-y-3.5">
+                  {/* Dynamic QR Code Card */}
+                  <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/10 flex flex-col items-center shadow-inner">
+                    <div className="p-3 bg-white rounded-2xl shadow-2xl">
+                      <img
+                        src={upiQrUrl}
+                        alt="Scan UPI QR Code to pay Divyanshu"
+                        className="w-36 h-36 object-contain rounded-lg"
+                      />
+                    </div>
+                    <div className="mt-2 text-xs font-bold text-white">
+                      Scan to enter any amount
+                    </div>
+                    <span className="text-[10px] text-slate-400 mt-0.5">
+                      Scan with Google Pay, PhonePe, Paytm or BHIM
+                    </span>
+                  </div>
+
+                  {/* Verified UPI ID Copy Row */}
+                  <div className="flex items-center justify-between gap-2 p-3 rounded-xl bg-black/60 border border-white/15">
+                    <div className="text-left">
+                      <div className="text-[10px] text-slate-400 uppercase font-semibold">Paytm UPI ID</div>
+                      <div className="text-sm font-mono font-bold text-white select-all">divyanshu390@ptyes</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={copyUpiId}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition active:scale-95"
+                    >
+                      {upiCopied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                      <span>{upiCopied ? "Copied!" : "Copy"}</span>
+                    </button>
+                  </div>
+
+                  {/* Pay via UPI App Button */}
+                  <a
+                    href={upiPayUrl}
+                    className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-rose-500 via-purple-600 to-blue-600 text-white font-bold text-sm flex items-center justify-center gap-2 hover:opacity-95 transition shadow-lg shadow-purple-600/30 active:scale-95 cursor-pointer"
+                  >
+                    <span>Pay via any UPI App</span>
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
+
+                  {/* Direct 1-Tap App Shortcuts */}
+                  <div className="flex items-center justify-center gap-2 flex-wrap text-xs">
+                    <a
+                      href={phonepeIntent}
+                      className="px-3 py-1.5 rounded-lg bg-purple-950/60 border border-purple-500/30 text-purple-200 hover:bg-purple-900/60 transition font-medium"
+                    >
+                      PhonePe
+                    </a>
+                    <a
+                      href={gpayIntent}
+                      className="px-3 py-1.5 rounded-lg bg-blue-950/60 border border-blue-500/30 text-blue-200 hover:bg-blue-900/60 transition font-medium"
+                    >
+                      Google Pay
+                    </a>
+                    <a
+                      href={paytmIntent}
+                      className="px-3 py-1.5 rounded-lg bg-sky-950/60 border border-sky-500/30 text-sky-200 hover:bg-sky-900/60 transition font-medium"
+                    >
+                      Paytm
+                    </a>
+                  </div>
+                </div>
+              )}
 
               {/* Footer Note */}
-              <div className="mt-3 text-[10px] text-slate-400 leading-normal">
-                100% of contributions go directly to Divyanshu's verified bank account via Paytm / Yes Bank.
+              <div className="mt-3.5 text-[10px] text-slate-400 leading-normal">
+                100% of contributions go directly to Divyanshu's verified bank account via Razorpay / Paytm.
               </div>
             </motion.div>
           </div>

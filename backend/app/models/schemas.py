@@ -83,3 +83,21 @@ class AuditResponse(BaseModel):
     summary_report: str = ""
     message: Optional[str] = None
     raw_diagnostics: Optional[dict] = None
+
+
+class CreateOrderRequest(BaseModel):
+    amount: float = Field(default=25.0, ge=1.0, description="Contribution amount in INR (minimum ₹1)")
+
+
+class CreateOrderResponse(BaseModel):
+    order_id: str
+    amount: int
+    currency: str = "INR"
+    key_id: str
+
+
+class VerifyPaymentRequest(BaseModel):
+    razorpay_order_id: str
+    razorpay_payment_id: str
+    razorpay_signature: str
+
