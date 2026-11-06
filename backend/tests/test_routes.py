@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
@@ -26,7 +26,7 @@ def test_audit_ssrf_rejection():
     assert "prohibited" in resp.json()["detail"].lower()
 
 
-@patch("app.api.routes.run_audit")
+@patch("app.api.routes.run_audit", new_callable=AsyncMock)
 def test_successful_mocked_audit(mock_run):
     mock_run.return_value = TinyFishRun(
         run_id="test_run_123",
@@ -60,7 +60,7 @@ def test_successful_mocked_audit(mock_run):
     assert len(data["findings"]) >= 1
 
 
-@patch("app.api.routes.run_audit")
+@patch("app.api.routes.run_audit", new_callable=AsyncMock)
 def test_audit_tinyfish_error_propagation(mock_run):
     mock_run.side_effect = TinyFishError("TinyFish inspection timed out after 300 seconds.")
 
@@ -69,7 +69,7 @@ def test_audit_tinyfish_error_propagation(mock_run):
     assert "timed out" in resp.json()["detail"]
 
 
-@patch("app.api.routes.run_audit")
+@patch("app.api.routes.run_audit", new_callable=AsyncMock)
 def test_audit_inconclusive_when_blocked(mock_run):
     mock_run.return_value = TinyFishRun(
         run_id="test_run_blocked",
